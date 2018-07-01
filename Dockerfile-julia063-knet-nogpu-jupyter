@@ -1,13 +1,15 @@
 # adapted from datasciencenotebook version a866877 fromn 1 Apr 18
-# jplewis remove R stuff, pkg.add of knet
+# jplewis remove R stuff, pkg.add Knet,Images, update to julia0.6.3
+# julia is installed into /opt/julia/
 #
-# docker build . -f Dockerfile-julia063-nogpu-jupyter -t julia063-nogpu-jupyter
+# docker build . -f Dockerfile-julia063-knet-nogpu-jupyter  -t julia063-knet-nogpu-jupyter 
 # run with both working dir and data dir mounted
 # docker run -p 8888:8888 -it --rm -e NB_UID=$(id -u) -e NB_GID=$(id -g) -e GRANT_SUDO=yes --user root  --mount type=bind,source="$(pwd)",target=/home/jovyan/work julia063-jupyter
 # 
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
-FROM jupyter/scipy-notebook
+#FROM jupyter/scipy-notebook
+FROM jupyter/minimal-notebook
 
 LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
 
@@ -64,11 +66,17 @@ RUN julia -e 'Pkg.init()' && \
     # Precompile Julia packages \
     julia -e 'using IJulia' && \
     julia -e 'using Knet' && \
+    julia -e 'Pkg.add("Images")' && \
     # move kernelspec out of home \
     mv $HOME/.local/share/jupyter/kernels/julia* $CONDA_DIR/share/jupyter/kernels/ && \
     chmod -R go+rx $CONDA_DIR/share/jupyter && \
     rm -rf $HOME/.local && \
     fix-permissions $JULIA_PKGDIR $CONDA_DIR/share/jupyter
+
+# /opt/julia is owned by uid 1000. The USER command did not work?
+#RUN sudo chown -R $NB_UID:$NB_GID /opt/julia
+RUN chown -R $NB_UID:$NB_GID /opt/julia
+#RUN chmod -R o+r /opt/julia/lib/v0.6	# otherwise get ERROR: LoadError: SystemError: opening file /opt/julia/lib/v0.6/IJulia.ji: Permission denied
 
 # no, this is haunted
 #RUN pip install jupyterthemes && jt -t chesterish
