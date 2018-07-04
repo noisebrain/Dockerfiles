@@ -14,7 +14,8 @@
 # Copyright (c) Jupyter Development Team.
 # Distributed under the terms of the Modified BSD License.
 
-FROM jupyter/minimal-notebook
+#FROM jupyter/minimal-notebook
+FROM jupyter/scipy-notebook
 
 LABEL maintainer="Jupyter Project <jupyter@googlegroups.com>"
 
@@ -45,10 +46,10 @@ RUN mkdir /opt/julia-${JULIA_VERSION} && \
     rm /tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
 RUN ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
 
-# Show Julia where conda libraries are \
+# Show Julia where conda libraries are 
+# Create JULIA_PKGDIR 
 RUN mkdir /etc/julia && \
     echo "push!(Libdl.DL_LOAD_PATH, \"$CONDA_DIR/lib\")" >> /etc/julia/juliarc.jl && \
-    # Create JULIA_PKGDIR \
     mkdir $JULIA_PKGDIR && \
     chown $NB_USER $JULIA_PKGDIR && \
     fix-permissions $JULIA_PKGDIR
@@ -58,6 +59,16 @@ USER $NB_UID
 #ARG mygid=100
 #USER $myuid:$mygid
 
+# R packages including IRKernel which gets installed globally.
+RUN conda install --quiet --yes \
+    'rpy2=2.8*' \
+    'r-base=3.4.1' \
+    'r-irkernel=0.8*' \
+    && \
+    conda clean -tipsy && \
+    fix-permissions $CONDA_DIR && \
+    fix-permissions /home/$NB_USER
+
 # Add Julia packages. Only add HDF5 if this is not a test-only build since
 # it takes roughly half the entire build time of all of the images on Travis
 # to add this one package and often causes Travis to timeout.
@@ -65,9 +76,9 @@ USER $NB_UID
 # Install IJulia as jovyan and then move the kernelspec out
 # to the system share location. Avoids problems with runtime UID change not
 # taking effect properly on the .local folder in the jovyan home dir.
+#     (test $TEST_ONLY_BUILD || julia -e 'Pkg.add("HDF5")') && \
 RUN julia -e 'Pkg.init()' && \
     julia -e 'Pkg.update()' && \
-    (test $TEST_ONLY_BUILD || julia -e 'Pkg.add("HDF5")') && \
     julia -e 'Pkg.add("Gadfly")' && \
     julia -e 'Pkg.add("IJulia")' && \
     julia -e 'Pkg.add("Knet")' && \
@@ -75,19 +86,21 @@ RUN julia -e 'Pkg.init()' && \
     julia -e 'Pkg.add("Images")' && \
     julia -e 'Pkg.add("ImageMagick")' && \
     julia -e 'Pkg.add("FileIO")' && \
-    julia -e 'Pkg.add("ArgParse")' && \
-    # Precompile Julia packages \
-    julia -e 'using IJulia' && \
+    julia -e 'Pkg.add("ArgParse")'
+
+# Precompile Julia packages. When this is merged with above, julia jupyter kernel does not get created
+RUN julia -e 'using IJulia' && \
     julia -e 'using ArgParse' && \
     julia -e 'using Knet' && \
     julia -e 'using Images' && \
     julia -e 'using FileIO' && \
-    julia -e 'using Knet,Images;include(Knet.dir("data","mnist.jl"))' \
-    # move kernelspec out of home \
-    mv $HOME/.local/share/jupyter/kernels/julia* $CONDA_DIR/share/jupyter/kernels/ && \
+    julia -e 'using Knet,Images;include(Knet.dir("data","mnist.jl"))' 
+
+# move kernelspec out of home 
+RUN mv $HOME/.local/share/jupyter/kernels/julia* $CONDA_DIR/share/jupyter/kernels/ && \
     chmod -R go+rx $CONDA_DIR/share/jupyter && \
-    rm -rf $HOME/.local && \
     fix-permissions $JULIA_PKGDIR $CONDA_DIR/share/jupyter
+#    rm -rf $HOME/.local && \
 
 #USER root
 # /opt/julia is owned by uid 1000. The USER command did not work?
@@ -98,5 +111,4 @@ RUN julia -e 'Pkg.init()' && \
 # no, this is haunted. use chrome dark reader
 #RUN pip install jupyterthemes && jt -t chesterish
 #RUN pip install jupyterthemes
-
 
