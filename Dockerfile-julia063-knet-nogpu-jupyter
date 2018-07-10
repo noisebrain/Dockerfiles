@@ -1,6 +1,8 @@
 # adapted from datasciencenotebook version a866877 fromn 1 Apr 18
 # jplewis remove R stuff, pkg.add Knet,Images, update to julia0.6.3
 # julia is installed into /opt/julia/
+# PROBLEM when using pyplot from julia, getting ArgumentError: haskey of NULL PyObject error
+# said to be something about linking wrong zlib https://github.com/JuliaPy/PyPlot.jl/issues/151
 #
 # docker build . -f Dockerfile-julia063-knet-nogpu-jupyter  -t julia063-knet-nogpu-jupyter  
 # to run, chmod o+rw on the working directory, then
