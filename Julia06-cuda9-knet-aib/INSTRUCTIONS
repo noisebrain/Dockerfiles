@@ -1,0 +1,41 @@
+Here's a docker image with knet and all prerequisites of knet's vgg example preinstalled:
+`    https://hub.docker.com/r/noisebrain/julia064-cuda9-knet-aib`
+
+
+Grab the vgg weights from here:
+`    http://www.vlfeat.org/matconvnet/models/imagenet-vgg-verydeep-16.mat`
+They need to be saved in the same folder that you're running the program in.
+
+
+To run:
+`    docker run --runtime=nvidia -v $PWD:/data  --rm --user root -e NB_UID=$(id -u) -e NB_GID=100 noisebrain/julia064-cuda9-knet-vgg vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16`
+
+That's complex. You can also make an bash alias such as
+`    alias julia-vgg='docker run --runtime=nvidia -v $PWD:/data  --rm --user root -e NB_UID=$(id -u) -e NB_GID=100 noisebrain/julia064-cuda9-knet-vgg vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16'`
+and then run it like this
+`    julia-vgg vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16`
+
+
+Alternately, to get a julia command prompt for interactive experimentation do this:
+`    docker run --runtime=nvidia -v $PWD:/data -it --rm --entrypoint /bin/bash noisebrain/julia064-cuda9-knet-aib`
+This brings up a shell prompt, from which julia can be run interactively. The julia executable is at /opt/julia/usr/bin/julia:
+`    root@9bd8c0a92a4e:/data# /opt/julia/usr/bin/julia`
+`    julia> using Knet`
+`    julia> gpu()`		# test if Knet sees a gpu (>= 0 means yes, -1 = no)
+
+
+The docker image was built using the dockerfile in this repo
+`    https://github.com/noisebrain/Dockerfiles/tree/master/Julia06-cuda9-knet-aib`
+using the build command
+`    docker build . -f julia064-cuda9-knet-aib.dockerfile -t julia064-cuda9-knet-aib`
+
+
+
+
+On the host linux machine, this needs an nvidia driver, docker, and nvidia docker;  everything else (cuda, etc) on the host is ignored. I originally followed portions of this guide: https://becominghuman.ai/how-to-build-a-deep-learning-server-based-on-docker-bea70b8bd2c7
+The tip about adding your user to the docker group is useful.
+
+
+
+
+

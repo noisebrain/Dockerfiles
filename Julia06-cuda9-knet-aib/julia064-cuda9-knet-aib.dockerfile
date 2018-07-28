@@ -7,17 +7,17 @@
 #
 # NOTES
 #
-# docker build . -f julia064-cuda9-knet-vgg.dockerfile -t julia064-cuda9-knet-vgg
+# docker build . -f julia064-cuda9-knet-aib.dockerfile -t julia064-cuda9-knet-aib
 # 
 # run commandline:
-# docker run --runtime=nvidia  $PWD:/data  --rm julia064-cuda9-knet-vgg-img vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16 
+# docker run --runtime=nvidia  $PWD:/data  --rm julia064-cuda9-knet-aib-img vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16 
 # with permission/uid mapping  
 # (PUTTING vgg.jl IN SUBFOLDER DOES NOT WORK because this line in vgg: "PROGRAM_FILE=="vgg.jl" && main(ARGS)")
-# docker run --runtime=nvidia -v $PWD:/data  --rm --user root -e NB_UID=$(id -u) -e NB_GID=100 julia064-cuda9-knet-vgg vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16 
+# docker run --runtime=nvidia -v $PWD:/data  --rm --user root -e NB_UID=$(id -u) -e NB_GID=100 julia064-cuda9-knet-aib vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16 
 # 
 # 
 # run a shell inside the container:
-# docker run --runtime=nvidia -v $PWD:/data -it --rm --entrypoint /bin/bash julia064-cuda9-knet-vgg
+# docker run --runtime=nvidia -v $PWD:/data -it --rm --entrypoint /bin/bash julia064-cuda9-knet-aib
 # Then run:   /opt/julia/usr/bin/julia vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16 
 # The imagenet-vgg-verydeep-16 must be copied into the launch folder, a symlink does not work.
 #
