@@ -3,7 +3,7 @@
 # julia is installed into /opt/julia/
 #
 # CURRENTLY (JULY18) THERE IS SOME zlib VERSION PROBLEM WITH USING hdf5 AND pyplot TOGETHER
-# SEE https://github.com/JuliaIO/HDF5.jl/issues/485
+# SEE https://github.com/JuliaIO/HDF5.jl/issues/485   ->   says to add hdf5 AFTER pyplot
 # THUS GIVE --build-arg TEST_ONLY_BUILD=1
 #
 # docker build . -f julia064-knet-nogpu-jupyter.dockerfile --build-arg TEST_ONLY_BUILD=1 -t julia064-knet-nogpu-jupyter  
@@ -76,11 +76,11 @@ RUN id
 # taking effect properly on the .local folder in the jovyan home dir.
 RUN julia -e 'Pkg.init()' && \
     julia -e 'Pkg.update()' && \
-    (test $TEST_ONLY_BUILD || julia -e 'Pkg.add("HDF5")') && \
     julia -e 'Pkg.add("Gadfly")' && \
     julia -e 'Pkg.add("IJulia")' && \
     julia -e 'Pkg.add("Knet")' && \
     julia -e 'Pkg.add("PyPlot")' && \
+    (test $TEST_ONLY_BUILD || julia -e 'Pkg.add("HDF5")') && \
     julia -e 'Pkg.add("Images")' && \
     julia -e 'Pkg.add("ImageMagick")' && \
     julia -e 'Pkg.add("FileIO")' && \
