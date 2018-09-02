@@ -1,6 +1,7 @@
-# COMMANDLINE: docker run --runtime=nvidia  --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  julia100-dev-gpu  mlp.jl
-# FIRST RUN, COPY .julia out: docker run --runtime=nvidia -it --rm -v ${PWD}:/data --entrypoint /bin/bash julia100-dev-gpu
-# JUPTYER RUN: docker run -p 8888:8888 --runtime=nvidia -it --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia --entrypoint /bin/bash julia100-dev-gpu
+# COMMANDLINE: dockNV  --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  julia07-gpu  mlp.jl
+# FIRST RUN, COPY .julia out: dockNV -it --rm -v ${PWD}:/data --entrypoint /bin/bash julia07-gpu
+# INTERACTIVE SHELL: dockNV -it --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  --entrypoint /bin/bash julia07-gpu
+# JUPTYER RUN: dockNV -p 8888:8888 -it --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia --entrypoint /bin/bash julia07-gpu
 
 
 # ----------------------------------------------------------------
@@ -88,7 +89,7 @@ RUN apt-get update && \
                     # basic stuff
                     build-essential ca-certificates \
                     # Julia
-                    curl wget gfortran git m4 zlib1g-dev imagemagick && \
+                    curl wget gfortran git m4 zlib1g-dev imagemagick hdf5-tools && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

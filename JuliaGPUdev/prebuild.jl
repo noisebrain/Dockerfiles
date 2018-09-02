@@ -3,13 +3,13 @@ println("running prebuild.jl")
 
 using Pkg
 
-_pkgs = ["GZip", "ArgParse","Images","ImageMagick","IJulia"]
+_pkgs = ["GZip", "ArgParse","Images","ImageMagick","IJulia","FileIO","HDF5","CMakeWrapper"]
 for p in _pkgs
   Pkg.add(p)
   Pkg.build(p)
 end
 
-using GZip, ArgParse,Images,IJulia,ImageMagick
+using GZip,ArgParse,Images,ImageMagick,IJulia,HDF5,CMakeWrapper
 
 Pkg.add(PackageSpec(url="https://github.com/denizyuret/AutoGrad.jl",rev="c3a91a8"))	# is 1.01
 #Pkg.add(PackageSpec(url="https://github.com/denizyuret/Knet.jl",rev="348a2fe")) # is 1.0.0 30aug18
