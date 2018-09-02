@@ -1,10 +1,7 @@
-julia0.6.4 + cuda-Knet, precompiled packages needed to run Knet vgg example (Images, etc)
-does not use an external volume for packages
+julia0.6.4 + cuda-Knet, precompiled packages needed to run Knet vgg example (Images, etc).
+Successfully runs vgg.
 
 Dockerfile adapted from JuliaGPU by Tim Besard
-
-1. Avoid making an external volume, install package under /pkg inside this image/container.
-Advantage: single file to keep track of (disadvantage: missing packages must be added on each run...)
-2. Add extra packages via precompile.jl
-3. Run the Knet vgg example, precompiling more packages
+- Add extra packages via precompile.jl
+- Run the Knet vgg example, precompiling more packages
 

@@ -10,10 +10,13 @@
 # docker build . -f julia064-cuda9-knet-aib.dockerfile -t julia064-cuda9-knet-aib
 # 
 # run commandline:
-# docker run --runtime=nvidia  $PWD:/data  --rm julia064-cuda9-knet-aib-img vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16 
+# alias dockNV='docker run --runtime=nvidia'
+# BASH: dockNV  -v $PWD:/data -v $JP/0.6:/pkg -it --rm --entrypoint /bin/bash noisebrain/julia064-cuda9-knet-aib 
+# MNIST CMDLINE: dockNV  -v $PWD:/data -v $JP/0.6:/pkg --rm noisebrain/julia064-cuda9-knet-aib mlp.jl
+# VGG CMDLINE: dockNV  -v $PWD:/data -v $JP/0.6:/pkg --rm noisebrain/julia064-cuda9-knet-aib vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16 
 # with permission/uid mapping  
 # (PUTTING vgg.jl IN SUBFOLDER DOES NOT WORK because this line in vgg: "PROGRAM_FILE=="vgg.jl" && main(ARGS)")
-# docker run --runtime=nvidia -v $PWD:/data  --rm --user root -e NB_UID=$(id -u) -e NB_GID=100 julia064-cuda9-knet-aib vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16 
+# dockNV -v $PWD:/data  --rm --user root -e NB_UID=$(id -u) -e NB_GID=100 noisebrain/julia064-cuda9-knet-aib vgg.jl cat.jpg --model /data/imagenet-vgg-verydeep-16 
 # 
 # 
 # run a shell inside the container:
@@ -110,7 +113,6 @@ WORKDIR /data
 
 RUN apt-get install --yes --no-install-recommends hdf5-tools
 RUN 	/opt/julia/usr/bin/julia -e 'Pkg.add("HDF5")' && \
-	/opt/julia/usr/bin/julia -e 'Pkg.add("HDF5")' && \
 	/opt/julia/usr/bin/julia -e 'Pkg.add("CMakeWrapper")' 
 
 RUN	/opt/julia/usr/bin/julia /root/vgg.jl /root/cat.jpg
