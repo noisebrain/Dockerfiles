@@ -1,0 +1,32 @@
+# ONE TIME: add this alias to your .bash_aliases, logout, log back in to pick it up:
+alias r-docker='docker run -p 8888:8888 -it --rm --user root -e NB_UID=$(id -u) -e NB_GID=100 -e GRANT_SUDO=yes  --mount type=bind,source="$(pwd)",target=/home/jovyan/work noisebrain/datasciencenotebook-aib start.sh bash'
+
+# ONE TIME:  docker pull noisebrain/datasciencenotebook-aib
+
+# pick a working directory, go there in the terminal
+# cause the .ipynb or .r file to be in the working directory
+
+# make a PROCESSED subfolder, put the r_input.csv file there
+> mkdir PROCESSED
+> mv r_input.csv PROCESSED
+
+# to be safe, make your working folder read/writeable by other.
+# the uid/gid stuff _should_ make this unnecessary
+> chmod -R o+rw .
+
+> r-docker
+# brings you to a bash shell inside the docker container. run "jupyter lab"
+jovyan@2b3fc7a4eeef:~$ jupyter lab
+
+# this prints out a string like:
+8888/?token=ed72a192d4e95b2d606d47d2fc938c8e787ae483125d0d3b&token=ed72a192d4e95b2d606d47d2fc938c8e787ae483125d0d3b
+# paste this into the browser url, prepended with localhost:
+# URL = localhost:8888/?token=ed72a19...
+
+# your working directory is mapped to /home/jovyan/work inside the container/notebook
+# (This is the standard jupyter/docker user)
+# You should be able to open .ipynb or .r file in the working directory
+
+# When done, ^C in the original terminal,
+# this shuts down the jupyter-r kernel.
+# Then ^D to exit docker (edited)
