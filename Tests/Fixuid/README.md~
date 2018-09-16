@@ -1,0 +1,7 @@
+# FIXUID script for docker 
+
+The FIXUID script causes files that are created in the container run to have any desired uid/gid.
+However, it does not alter files that were created during the build.
+
+https://boxboat.com/2017/07/25/fixuid-change-docker-container-uid-gid/
+https://github.com/boxboat/fixuid
