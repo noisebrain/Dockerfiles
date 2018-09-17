@@ -1,5 +1,5 @@
 # this dockerfile launches rstudio server, can attach to it from the browser, nice!
-#   docker container run --rm -p 8787:8787 -v ${PWD}:/home/rstudio -w /home/rstudio rstudio-server-aib
+#   docker container run --rm -p 8787:8787 -u $(id -u):9955 -v ${PWD}:/home/rstudio -w /home/rstudio rstudio-server-aib
 #   in browser:  localhost:8787
 # docker build . -f rstudio-server-aib.dockerfile -t rstudio-server-aib
 # Adapted from here https://hub.docker.com/r/dceoy/rstudio-server/  https://github.com/dceoy/docker-rstudio-server
@@ -98,7 +98,7 @@ RUN groupadd rstudio -g $mygid && useradd -m -d /home/rstudio -u $myuid -g rstud
 # USER rstudio	<- cannot login when this is added!!
 
 # on the linux host, do this one-time setup:
-# sudo groupadd duckuser -g 9955 && sudo adduser -m user group  # and logout/in.  
+# sudo groupadd duckuser -g 9955 && sudo adduser  zilla duckuser  # and logout/in.  
 # or: sudo usermod -a -G duckuser zilla
 # to clean up later: sudo deluser user group 
 
