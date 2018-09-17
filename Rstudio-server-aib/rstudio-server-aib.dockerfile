@@ -89,31 +89,39 @@ RUN set -e \
 # switch user - does not allow login!
 # linux:  
 # - if host folder is go-w get (Permission denied) [path=/home/rstudio/.rstudio,
-# - with go+w can run with default uid, created files show as 1000:1000 on the host
-# - with new groupadd code, gid gets set to 999, maybe 9955 was too high, but worked.
+# - with go+w on host folder can run with default uid, created files show as 1000:1000 on the host
+# - with new groupadd code, gid gets set to 999, but worked. maybe 9955 was too high.
 #   uid 9955/9955 created files on host have 9955:999 = 9955:docker  ->  docker is 999 group
 # - with uid/gid both 987, gives invalid uname/passwd.  also when uid/gid = 980/987
-# - passing commandline arg -u $(id -u):9955 gives invalid psw
+# - passing commandline arg -u $(id -u):9955 gives invalid psw.  also for -u 504:999.
+# - the groupadd -g 9955 actually results in 999 being added.
+#   current results /etc/passwd
+#     rstudio-server:x:999:999::/home/rstudio-server:/bin/sh   <- is added by rstudio install!
+#     rstudio:x:9955:999::/home/rstudio:/bin/sh
+#   /etc/group
+#     rstudio-server:x:999:   <- is added by rstudio install
+# - on linux host the 999 group is the docker group, already exists and my user is in that group
+# https://support.rstudio.com/hc/en-us/community/posts/200661923-Does-Rstudio-have-to-run-as-root-
 #----------------------------------------------------------------
 
 ARG myuid=9955
 ARG mygid=9955
 # the container will be running as this, unless overridden with --user
-RUN set -e \
-	groupadd rstudio-server -g $mygid && useradd -m -d /home/rstudio -u $myuid -g rstudio-server rstudio \
-	&& echo rstudio:rstudio | chpasswd
+#RUN set -e \
+#	groupadd -g $mygid rstudio-server && useradd -m -d /home/rstudio -u $myuid -g rstudio-server rstudio \
+#	&& echo rstudio:rstudio | chpasswd
 # USER rstudio	<- cannot login when this is added!!
 
 # originally:
-#RUN set -e \
-#      && useradd -m -d /home/rstudio -G rstudio-server rstudio \
-#      && echo rstudio:rstudio | chpasswd
+RUN set -e \
+      && useradd -m -d /home/rstudio -G rstudio-server rstudio \
+      && echo rstudio:rstudio | chpasswd
 
 
 # on the linux host, do this one-time setup:
 # sudo groupadd duckuser -g 9955 && sudo adduser  zilla duckuser  # and logout/in.  
 # or: sudo usermod -a -G duckuser zilla
-# to clean up later: sudo deluser user group 
+# to clean up later: sudo deluser <user> <group>  # remove user from group
 
 EXPOSE 8787
 
