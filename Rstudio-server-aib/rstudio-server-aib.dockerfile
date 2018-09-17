@@ -87,15 +87,28 @@ RUN set -e \
 
 #----------------------------------------------------------------
 # switch user - does not allow login!
+# linux:  
+# - if host folder is go-w get (Permission denied) [path=/home/rstudio/.rstudio,
+# - with go+w can run with default uid, created files show as 1000:1000 on the host
+# - with new groupadd code, gid gets set to 999, maybe 9955 was too high, but worked.
+#   uid 9955/9955 created files on host have 9955:999 = 9955:docker  ->  docker is 999 group
+# - with uid/gid both 987, gives invalid uname/passwd.  also when uid/gid = 980/987
+# - passing commandline arg -u $(id -u):9955 gives invalid psw
 #----------------------------------------------------------------
 
 ARG myuid=9955
 ARG mygid=9955
 # the container will be running as this, unless overridden with --user
-# formerly:        && useradd -m -d /home/rstudio -G rstudio-server rstudio \
-RUN groupadd rstudio -g $mygid && useradd -m -d /home/rstudio -u $myuid -g rstudio rstudio \
+RUN set -e \
+	groupadd rstudio-server -g $mygid && useradd -m -d /home/rstudio -u $myuid -g rstudio-server rstudio \
 	&& echo rstudio:rstudio | chpasswd
 # USER rstudio	<- cannot login when this is added!!
+
+# originally:
+#RUN set -e \
+#      && useradd -m -d /home/rstudio -G rstudio-server rstudio \
+#      && echo rstudio:rstudio | chpasswd
+
 
 # on the linux host, do this one-time setup:
 # sudo groupadd duckuser -g 9955 && sudo adduser  zilla duckuser  # and logout/in.  
