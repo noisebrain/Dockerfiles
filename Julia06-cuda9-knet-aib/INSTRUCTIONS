@@ -4,7 +4,7 @@ Here's a docker image with knet and all prerequisites of knet's vgg example prei
 
 Grab the vgg weights from here:
 `    http://www.vlfeat.org/matconvnet/models/imagenet-vgg-verydeep-16.mat`
-They need to be saved in the same folder that you're running the program in.
+*They need to be saved in the same folder* that you're running the program in.
 
 
 To run:
