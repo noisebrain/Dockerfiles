@@ -1,7 +1,7 @@
 # adapted from version a866877 fromn 1 Apr 18
 # jplewis add R libraries needed for ABI: agricolae,lme4,nlme,psych
 #
-# docker build . -f Dockerfile-datasciencenotebook-abi -t datasciencenotebook-abi-a866
+# docker build . -f Dockerfile-datasciencenotebook-abi --network host -t datasciencenotebook-abi-a866
 # run with both working dir and data dir mounted
 # docker run -p 8888:8888 -it --rm -e NB_UID=$(id -u) -e NB_GID=$(id -g) -e GRANT_SUDO=yes --user root  --mount type=bind,source="$(pwd)",target=/home/jovyan/work --mount type=bind,source=/home/zilla/NOTMIRROR/zillanosave/S/ArtInverseBrain,target=/home/jovyan/work/data noisebrain/datasciencenotebook-abi 
 # 

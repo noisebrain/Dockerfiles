@@ -2,6 +2,7 @@
 # FIRST RUN, COPY .julia out: dockNV -it --rm -v ${PWD}:/data --entrypoint /bin/bash julia07-gpu
 # INTERACTIVE SHELL: dockNV -it --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  --entrypoint /bin/bash julia07-gpu
 # JUPTYER RUN: dockNV -p 8888:8888 -it --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia --entrypoint /bin/bash julia07-gpu
+# docker build . -f julia07-dev-gpu.dockerfile --network host -t julia07-dev-gpu
 
 
 # ----------------------------------------------------------------
