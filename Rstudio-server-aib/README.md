@@ -40,5 +40,24 @@ On a linux machine behind a firewall it may be necessary to add `--network host`
 
 In a browser, go to `localhost:8787`
 
+## Stop the server when done
 
+Important to do this -- otherwise it may keep using disk or memory. I think rebooting is not enough to clear it.
+
+First have a look at the docker processes
+
+    docker ps -a
+
+This will return a lsit such as 
+
+    CONTAINER ID        IMAGE                COMMAND                  CREATED             STATUS              PORTS                    NAMES
+    0c4e976e40c5        rstudio-server-aib   "/usr/lib/rstudio-se."   3 minutes ago       Up 3 minutes        0.0.0.0:8787->8787/tcp   quizzical_goldberg
+
+Probably there should be only such line, containing 'rstudio-server-aib' (if there are more, remove them using "docker rm").
+
+Note the container ID, and run docker stop on it:
+
+    docker stop 0c4e
+
+As with git, it is enough to give the unique prefix 0c4e rather than the whole id 0c4e976e40c5.
 
