@@ -1,7 +1,23 @@
 # this dockerfile launches rstudio server, can attach to it from the browser, nice!
-#   docker container run --rm -p 8787:8787 -u $(id -u):9955 -v ${PWD}:/home/rstudio -w /home/rstudio rstudio-server-aib
-#   in browser:  localhost:8787
-# docker build . -f rstudio-server-aib.dockerfile -t rstudio-server-aib
+#
+# If on linux behind firewall: try adding "--network host" to both the build and run
+# On Mac running with --network host does not work.
+#
+# On linux, first make a Folder with docker group, and run inside that folder:
+#	umask u=rwx,g=rwx,o=rx    #set group writable umask   
+#	mkdir Folder
+#	chgrp docker Folder
+#	chmod g+s Folder	# group sticky bit
+#	cd Folder
+#
+# Now launch the docker server
+#   	docker run --rm -p 8787:8787 -u $(id -u):9955 -v ${PWD}:/home/rstudio -w /home/rstudio rstudio-server-aib
+#	# also try --network  host
+# And in a browser, go to
+#	localhost:8787
+#
+# To build the docker image:
+# 	docker build . -f rstudio-server-aib.dockerfile -t rstudio-server-aib  	# also try --network  host
 # Adapted from here https://hub.docker.com/r/dceoy/rstudio-server/  https://github.com/dceoy/docker-rstudio-server
 # Modifications:
 # 1. That version used R 3.4, had trouble switching to 3.5, a key was to use ubuntu18.10
@@ -12,7 +28,7 @@
 # https://cran.r-project.org/bin/linux/debian/
 # https://cran.r-project.org/bin/linux/ubuntu/README.html
 
-# using 18.04 or earlier version results in the wrong cran,
+# as of sep18 using 18.04 or earlier version results in the wrong cran,
 # gives a long list of unmet dependencies e.g.  r-cran-zoo : Depends: r-api-3.4
 FROM ubuntu:18.10
 
@@ -84,47 +100,35 @@ RUN set -e \
 # INTENTIONALLY LEAVE OFF ONE PACKAGE TO SEE IF WE HAVE PERMISSIONS TO INSTALL IT
 # command above needs wPerm
 #      pkgs <- c('FSA','agricolae','rcompanion','wPerm'); \
+# Try running this in rstudio:
+# if(!require(wPerm)){install.packages("wPerm")}
+# library(wPerm)
+# if(!require(abctools)){install.packages("abctools")}
+# library(abctools)
+
+
+## UID/GID: Rstudio runs as root, then does a setuid(?) to the "rstudio" user.
+## With this dockerfile, /etc/passwd and /etc/group have these:
+##   rstudio-server:x:999:999::/home/rstudio-server:/bin/sh
+##   rstudio:x:1000:1000::/home/rstudio:/bin/sh
+##   ------------
+##   rstudio-server:x:999:rstudio
+##   rstudio:x:1000:
+## The 999 group is coincidentally(?) the docker group on linux. By setting the host folder as
+##   mkdir Folder;  chgrp docker Filer; chmod g+s Folder then 
+## 1) Rstudio can write in the folder (group writable and same group), 
+## 2) viewed from the host, created files will have uid/gid 1000:docker and rw-r-r permission.
+##   They can be moved/removed, but not edited without doing a chmod g+w.
+
 
 #----------------------------------------------------------------
-# switch user - does not allow login!
-# linux:  
-# - if host folder is go-w get (Permission denied) [path=/home/rstudio/.rstudio,
-# - with go+w on host folder can run with default uid, created files show as 1000:1000 on the host
-# - with new groupadd code, gid gets set to 999, but worked. maybe 9955 was too high.
-#   uid 9955/9955 created files on host have 9955:999 = 9955:docker  ->  docker is 999 group
-# - with uid/gid both 987, gives invalid uname/passwd.  also when uid/gid = 980/987
-# - passing commandline arg -u $(id -u):9955 gives invalid psw.  also for -u 504:999.
-# - the groupadd -g 9955 actually results in 999 being added.
-#   current results /etc/passwd
-#     rstudio-server:x:999:999::/home/rstudio-server:/bin/sh   <- is added by rstudio install!
-#     rstudio:x:9955:999::/home/rstudio:/bin/sh
-#   /etc/group
-#     rstudio-server:x:999:   <- is added by rstudio install
-# - on linux host the 999 group is the docker group, already exists and my user is in that group
-# https://support.rstudio.com/hc/en-us/community/posts/200661923-Does-Rstudio-have-to-run-as-root-
+# add the rstudio user
 #----------------------------------------------------------------
 
-ARG myuid=9955
-ARG mygid=9955
-# the container will be running as this, unless overridden with --user
-#RUN set -e \
-#	groupadd -g $mygid rstudio-server && useradd -m -d /home/rstudio -u $myuid -g rstudio-server rstudio \
-#	&& echo rstudio:rstudio | chpasswd
-# USER rstudio	<- cannot login when this is added!!
-
-# originally:
 RUN set -e \
       && useradd -m -d /home/rstudio -G rstudio-server rstudio \
       && echo rstudio:rstudio | chpasswd
 
-
-# on the linux host, do this one-time setup:
-# sudo groupadd duckuser -g 9955 && sudo adduser  zilla duckuser  # and logout/in.  
-# or: sudo usermod -a -G duckuser zilla
-# to clean up later: sudo deluser <user> <group>  # remove user from group
-
 EXPOSE 8787
-
-#----------------------------------------------------------------
 
 CMD ["/usr/lib/rstudio-server/bin/rserver", "--server-daemonize=0", "--server-app-armor-enabled=0"]
