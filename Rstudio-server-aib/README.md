@@ -32,7 +32,7 @@ This sets the folder group to "docker", makes it writable by group, and sets the
 
 ## Start the rstudio server
 
-    docker container run --rm -p 8787:8787 -v ${PWD}:/home/rstudio -w /home/rstudio rstudio-server-aib
+    docker run --rm -p 8787:8787 -v ${PWD}:/home/rstudio -w /home/rstudio noisebrain/rstudio-server-aib
 
 On a linux machine behind a firewall it may be necessary to add `--network host` if the R process needs to access the internet (to install packages)
 

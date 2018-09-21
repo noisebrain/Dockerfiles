@@ -11,7 +11,7 @@
 #	cd Folder
 #
 # Now launch the docker server
-#   	docker run --rm -p 8787:8787 -u $(id -u):9955 -v ${PWD}:/home/rstudio -w /home/rstudio rstudio-server-aib
+#   	docker run --rm -p 8787:8787 -v ${PWD}:/home/rstudio -w /home/rstudio noisebrain/rstudio-server-aib
 #	# also try --network  host
 # And in a browser, go to
 #	localhost:8787
@@ -93,7 +93,7 @@ RUN set -e \
       && umask u=rwx,g=rwx,o=rx \
       && R -e "\
       update.packages(ask = FALSE, repos = '${CRAN_URL}'); \
-      pkgs <- c('FSA','agricolae','rcompanion'); \
+      pkgs <- c('FSA','agricolae','rcompanion', 'effsize'); \
       install.packages(pkgs = pkgs, dependencies = TRUE, repos = '${CRAN_URL}'); \
       sapply(pkgs, require, character.only = TRUE);"
 
