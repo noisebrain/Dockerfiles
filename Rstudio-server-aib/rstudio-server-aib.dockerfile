@@ -131,4 +131,7 @@ RUN set -e \
 
 EXPOSE 8787
 
+# copy the dockerfile into the image to help identify 
+COPY rstudio-server-aib.dockerfile /
+
 CMD ["/usr/lib/rstudio-server/bin/rserver", "--server-daemonize=0", "--server-app-armor-enabled=0"]

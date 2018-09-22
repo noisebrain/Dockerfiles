@@ -16,8 +16,8 @@ Have not tried this yet. It should run, however there may be folder permission i
 
 If not done previously, make a docker group and add yourself to it:
 
-    sudo groupadd -g 999 docker`
-    sudo usermod -aG docker mylogin`
+    sudo groupadd -g 999 docker
+    sudo usermod -aG docker mylogin
 
 Replace `mylogin` with your login name.
 
