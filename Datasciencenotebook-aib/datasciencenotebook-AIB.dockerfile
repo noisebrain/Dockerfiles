@@ -1,3 +1,5 @@
+this worked, but use rstudio-server-aib.  rstudio is much nicer.
+
 # adapted from version a866877 fromn 1 Apr 18
 # jplewis add R libraries needed for ABI: agricolae,lme4,nlme,psych
 #
