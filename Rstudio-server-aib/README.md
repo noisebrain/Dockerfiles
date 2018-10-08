@@ -25,6 +25,7 @@ Make a folder to work in, with friendly permissions.
 
     mkdir MyDockerFolder
     chgrp docker MyDockerFolder
+    chmod g+w MyDockerFolder
     chmod g+s MyDockerFolder
     cd MyDockerFolder 
 
