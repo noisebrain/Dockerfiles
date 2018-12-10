@@ -4,9 +4,14 @@ using Pkg
 
 # dec18 suggested workaround for a problem building MAT, comes up while running vae-mnist.jl.
 # did not help, though not clear if it correctly loaded the right version
-Pkg.add(PackageSpec(url="https://github.com/jheinen/GR.jl", rev = "a25a7f1"))
-Pkg.add("MAT")
-Pkg.build("MAT")
+# seems to always report loading 0.36...
+# Pkg.add(PackageSpec(url="https://github.com/jheinen/GR.jl", version="0.35.0"))
+# 
+# FAILS HERE.  THIS IS NOT NECESSARY FOR KNET, BUT NEEDED FOR VAE EXAMPLE
+# SPECIFICALLY, LOADING imagenet.jl CAUSES THIS. HOWEVER VAE-MNIST.jl DOES NOT NEED THIS.
+# Pkg.add("MAT")
+# Pkg.build("MAT")
+# using MAT
 
 _pkgs = ["GZip", "ArgParse","Images","ImageMagick","IJulia","FileIO","HDF5","CMakeWrapper"]
 for p in _pkgs

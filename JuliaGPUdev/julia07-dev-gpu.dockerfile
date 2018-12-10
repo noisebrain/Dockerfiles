@@ -1,5 +1,9 @@
+# dec18 this works, however trying to run vae-mnist fails when loading MAT, extra token error
+
 # COMMANDLINE: dockNV  --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  julia07-gpu  mlp.jl
 # FIRST RUN, COPY .julia out: dockNV -it --rm -v ${PWD}:/data --entrypoint /bin/bash julia07-gpu
+# 	run once, cp ~/.julia /data/JULIAPKGS
+# 	run again with -v /someplace/JULIAPKGS:/root/.julia  -v ${PWD}:/data 
 # INTERACTIVE SHELL: dockNV -it --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  --entrypoint /bin/bash julia07-gpu
 # JUPTYER RUN: dockNV -p 8888:8888 -it --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia --entrypoint /bin/bash julia07-gpu
 # docker build . -f julia07-dev-gpu.dockerfile --network host -t julia07-dev-gpu
@@ -79,10 +83,10 @@ FROM nvcr.io/nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04
 MAINTAINER j.p.lewis <noisebrain@gmail.com>
 
 ENV HOME=/root
-#ENV JULIA_VERSION=1.0.0
-#ARG JULVER=1.0
-ENV JULIA_VERSION=0.7.0
-ARG JULVER=0.7
+ENV JULIA_VERSION=1.0.2
+ARG JULVER=1.0
+#ENV JULIA_VERSION=0.7.0
+#ARG JULVER=0.7
 
 
 RUN apt-get update && \
@@ -115,12 +119,12 @@ RUN apt-get update && \
 
 # 0.6.4:     echo "d20e6984bcf8c3692d853a9922e2cf1de19b91201cb9e396d9264c32cebedc46 *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
 # 0.7.0:     echo "35211bb89b060bfffe81e590b8aeb8103f059815953337453f632db9d96c1bd6 *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
-# 1.0.0:     echo "bea4570d7358016d8ed29d2c15787dbefaea3e746c570763e7ad6040f17831f3 *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
+# 1.0.2:     echo "e0e93949753cc4ac46d5f27d7ae213488b3fef5f8e766794df0058e1b3d2f142 *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
 
 RUN mkdir /opt/julia-${JULIA_VERSION} && \
     cd /tmp && \
     wget -q https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz && \
-# 1.0.0:     echo "bea4570d7358016d8ed29d2c15787dbefaea3e746c570763e7ad6040f17831f3 *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
+    echo "e0e93949753cc4ac46d5f27d7ae213488b3fef5f8e766794df0058e1b3d2f142 *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
     tar xzf julia-${JULIA_VERSION}-linux-x86_64.tar.gz -C /opt/julia-${JULIA_VERSION} --strip-components=1 && \
     rm /tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
 RUN ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
@@ -134,11 +138,8 @@ COPY prebuild.jl /usr/local/bin
 #RUN ./julia -e 'using Pkg; Pkg.add("ArgParse")'
 RUN julia prebuild.jl
 
-#COPY prebuild2.jl /usr/local/bin
-#RUN LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/root/.julia/packages/Conda/m7vem/deps/usr/lib && julia prebuild2.jl
-
-## configure jupyter kernel and jupyterlab
-RUN mv ${HOME}/.local/share/jupyter/kernels/julia-${JULVER} ${HOME}/.julia/packages/Conda/m7vem/deps/usr/share/jupyter/kernels && /root/.julia/packages/Conda/m7vem/deps/usr/bin/conda install -y jupyterlab
+## configure jupyter kernel and jupyterlab  <-- worked under earlier versions, now the conda path does not exist
+## RUN mv ${HOME}/.local/share/jupyter/kernels/julia-${JULVER} ${HOME}/.julia/packages/Conda/m7vem/deps/usr/share/jupyter/kernels && /root/.julia/packages/Conda/m7vem/deps/usr/bin/conda install -y jupyterlab
 
 
 ## execution
@@ -158,4 +159,6 @@ RUN echo "echo TO LAUNCH JUPYTER: /root/.julia/packages/Conda/m7vem/deps/usr/bin
 # run again with -v ${PWD}/JULIAPKGS:/root/.julia 
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
+COPY julia100-dev-gpu.dockerfile /
+
 ENTRYPOINT ["/usr/local/bin/julia"]
