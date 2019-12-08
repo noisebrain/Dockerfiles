@@ -19,7 +19,7 @@ for p in _pkgs
   Pkg.build(p)
 end
 
-using GZip,ArgParse,Images,ImageMagick,IJulia,HDF5,CMakeWrapper
+#using GZip,ArgParse,Images,ImageMagick,IJulia,HDF5,CMakeWrapper
 
 # pull particular versions, was needed shortly after 1.0 release
 #Pkg.add(PackageSpec(url="https://github.com/denizyuret/AutoGrad.jl",rev="c3a91a8"))	# is 1.01
@@ -29,7 +29,8 @@ using GZip,ArgParse,Images,ImageMagick,IJulia,HDF5,CMakeWrapper
 #using Knet
 
 Pkg.add("Knet")
-Pkg.build("Knet")
+Pkg.test("Knet")	#  Building the CUDAnative run-time library for your sm_61 device, this might take a while...
+#Pkg.build("Knet")
 using Knet
 
 exit(0)

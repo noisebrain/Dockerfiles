@@ -1,16 +1,30 @@
+# dec19 built julia120-cuda92-knet132 on MLduck, gpu() returns 0, however no actual tests yet
 # dec18 this works, however trying to run vae-mnist fails when loading MAT, extra token error
 
+# if julia tar.gz is downloaded in /tmp it will be used
+# docker build . -f julia120-dev-gpu.dockerfile --network host -t julia120-cuda92
+# nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash julia120-cuda92
+# bash# /usr/local/bin/julia
+# julia> include("prebuild.jl")
+# julia> ^D
+# bash# ^D
+# docker commit bff36d4f0183 julia120-cuda92-knet132
+# nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash julia120-cuda92-knet132
+
+# 			OLD, TODO
 # COMMANDLINE: dockNV  --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  julia07-gpu  mlp.jl
 # FIRST RUN, COPY .julia out: dockNV -it --rm -v ${PWD}:/data --entrypoint /bin/bash julia07-gpu
 # 	run once, cp ~/.julia /data/JULIAPKGS
 # 	run again with -v /someplace/JULIAPKGS:/root/.julia  -v ${PWD}:/data 
 # INTERACTIVE SHELL: dockNV -it --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  --entrypoint /bin/bash julia07-gpu
 # JUPTYER RUN: dockNV -p 8888:8888 -it --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia --entrypoint /bin/bash julia07-gpu
-# docker build . -f julia120-dev-gpu.dockerfile --network host -t julia120-dev-gpu
+# 
 
-
+# Key problem is that "docker build" is not nvidia-docker, and so has no access to the GPU,
+# thus trying to add GPU packages at build time will not work unless some tricks are done (below)
+#
 # ----------------------------------------------------------------
-# ---------------- NOTES -----------------------------------------
+# ---------------- OLD NOTES -----------------------------------------
 # ----------------------------------------------------------------
 #
 # adapted from dockerfile by Tim Besard <tim.besard@gmail.com>
@@ -76,6 +90,7 @@
 # 
 #----------------------------------------------------------------
 
+# docker pull nvcr.io/nvidia/pytorch:19.11-py3
 FROM nvcr.io/nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04
 #FROM nvcr.io/nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 #FROM nvidia/cuda:8.0-cudnn7-devel-ubuntu16.04
@@ -84,6 +99,7 @@ MAINTAINER j.p.lewis <noisebrain@gmail.com>
 
 ENV HOME=/root
 ENV JULIA_VERSION=1.2.0
+ENV CUDA_HOME=/usr/local/cuda-9.2
 #ARG JULVER=1.2	# not used
 
 
@@ -116,12 +132,12 @@ RUN apt-get update && \
 # this unpacks into /opt/julia-${JULIA_VERSION} , ../bin/julia is the executable
 
 # retrieve a checksum from url like this: https://julialang-s3.julialang.org/bin/checksums/julia-1.2.0.sha256
-#SHASUM="d20e6984bcf8c3692d853a9922e2cf1de19b91201cb9e396d9264c32cebedc46"  #0.6.4
-#SHASUM="35211bb89b060bfffe81e590b8aeb8103f059815953337453f632db9d96c1bd6"  #0.7.0
-#SHASUM="e0e93949753cc4ac46d5f27d7ae213488b3fef5f8e766794df0058e1b3d2f142"  #1.0.2
-SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"  #1.2.0
-#SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8"  #1.3.0
-
+#ENV SHASUM="d20e6984bcf8c3692d853a9922e2cf1de19b91201cb9e396d9264c32cebedc46"  #0.6.4
+#ENV SHASUM="35211bb89b060bfffe81e590b8aeb8103f059815953337453f632db9d96c1bd6"  #0.7.0
+#ENV SHASUM="e0e93949753cc4ac46d5f27d7ae213488b3fef5f8e766794df0058e1b3d2f142"  #1.0.2
+#ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"  #1.2.0
+#ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8"  #1.3.0
+ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"
 
 RUN mkdir /opt/julia-${JULIA_VERSION} && \
     cd /tmp && \
@@ -136,18 +152,18 @@ ENV JULIAEXE=/usr/local/bin/julia
 
 ## packages
 
-COPY prebuild.jl /usr/local/bin
-#RUN ./julia -e 'using Pkg; Pkg.add("ArgParse")'
-RUN julia prebuild.jl
-
 ## configure jupyter kernel and jupyterlab  <-- worked under earlier versions, now the conda path does not exist
 ## RUN mv ${HOME}/.local/share/jupyter/kernels/julia-${JULVER} ${HOME}/.julia/packages/Conda/m7vem/deps/usr/share/jupyter/kernels && /root/.julia/packages/Conda/m7vem/deps/usr/bin/conda install -y jupyterlab
 
 
 ## execution
 
-#VOLUME /data
-#WORKDIR /data
+VOLUME /data
+WORKDIR /data
+COPY prebuild.jl /data
+#RUN ./julia -e 'using Pkg; Pkg.add("ArgParse")'
+#RUN julia prebuild.jl
+
 
 RUN echo "echo TO LAUNCH JUPYTER: /root/.julia/packages/Conda/m7vem/deps/usr/bin/jupyter lab --ip 0.0.0.0 --port 8888 --allow-root"  >> ~/.bashrc
 
@@ -161,6 +177,6 @@ RUN echo "echo TO LAUNCH JUPYTER: /root/.julia/packages/Conda/m7vem/deps/usr/bin
 # run again with -v ${PWD}/JULIAPKGS:/root/.julia 
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
-COPY julia100-dev-gpu.dockerfile /
+COPY julia120-dev-gpu.dockerfile /data
 
 ENTRYPOINT ["/usr/local/bin/julia"]
