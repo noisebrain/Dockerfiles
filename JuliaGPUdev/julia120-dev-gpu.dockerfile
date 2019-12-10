@@ -2,14 +2,14 @@
 # dec18 this works, however trying to run vae-mnist fails when loading MAT, extra token error
 
 # if julia tar.gz is downloaded in /tmp it will be used
-# docker build . -f julia120-dev-gpu.dockerfile --network host -t julia120-cuda92
-# nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash julia120-cuda92
+# sudo docker build . -f julia120-dev-gpu.dockerfile --network host -t julia120-cuda92
+# sudo nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash julia120-cuda92
 # bash# /usr/local/bin/julia
 # julia> include("prebuild.jl")
 # julia> ^D
-# bash# ^D
+#     BACK TO HOST BASH
 # docker commit bff36d4f0183 julia120-cuda92-knet132
-# nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash julia120-cuda92-knet132
+# sudo nvidia-docker run --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash julia120-cuda92-knet132
 
 # 			OLD, TODO
 # COMMANDLINE: dockNV  --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  julia07-gpu  mlp.jl
@@ -99,7 +99,7 @@ MAINTAINER j.p.lewis <noisebrain@gmail.com>
 
 ENV HOME=/root
 ENV JULIA_VERSION=1.2.0
-ENV CUDA_HOME=/usr/local/cuda-9.2
+ENV CUDA_HOME=/usr/local/cuda
 #ARG JULVER=1.2	# not used
 
 
@@ -142,7 +142,7 @@ ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"
 RUN mkdir /opt/julia-${JULIA_VERSION} && \
     cd /tmp && \
         [ -f julia-${JULIA_VERSION}-linux-x86_64.tar.gz ] || ( wget -q https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz ) && \
-    echo "926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47 *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
+    echo "${SHASUM} *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
     tar xzf julia-${JULIA_VERSION}-linux-x86_64.tar.gz -C /opt/julia-${JULIA_VERSION} --strip-components=1 && \
     rm /tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
 RUN ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
@@ -158,9 +158,9 @@ ENV JULIAEXE=/usr/local/bin/julia
 
 ## execution
 
-VOLUME /data
-WORKDIR /data
-COPY prebuild.jl /data
+VOLUME /install
+WORKDIR /install
+COPY prebuild.jl /install
 #RUN ./julia -e 'using Pkg; Pkg.add("ArgParse")'
 #RUN julia prebuild.jl
 
@@ -173,10 +173,10 @@ RUN echo "echo TO LAUNCH JUPYTER: /root/.julia/packages/Conda/m7vem/deps/usr/bin
 # RUN mv ~/.julia /PREBUILT		# SLOW
 
 # instead:
-# run once, cp ~/.julia /data/JULIAPKGS
+# run once, cp ~/.julia /install/JULIAPKGS
 # run again with -v ${PWD}/JULIAPKGS:/root/.julia 
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
-COPY julia120-dev-gpu.dockerfile /data
+COPY julia120-dev-gpu.dockerfile /install
 
 ENTRYPOINT ["/usr/local/bin/julia"]
