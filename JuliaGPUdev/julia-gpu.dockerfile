@@ -11,16 +11,18 @@
 # sudo nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}
 # container# /usr/local/bin/julia
 # julia> include("prebuild.jl")
+# todo merge this into prebuild:
 # julia> using IJulia
 # julia> notebook()	# causes miniconda to be downloaded
 #				Pkg.add("Conda")
 #				using Conda
 #				Conda.add("jupyterlab") # runs conda install -y jupyterlab
+#				^^^^ this worked to add jupyterlab!	
 # julia> ^D
 #     BACK TO HOST BASH
 # docker commit bff36d4f0183 ${juliaver}-${cudaver}-${knetver}
 # sudo nvidia-docker run -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-${knetver}
-# container# /root/.julia/conda/3/bin/jupyter notebook -ip 0.0.0.0 -port 8888 -allow-root
+# container# cd /work; /root/.julia/conda/3/bin/jupyter lab --ip 0.0.0.0 --port 8888 --allow-root # lab|notebook
 # local browser go to link like http://127.0.0.1:888/?token= ...
 # notebook new>
 
@@ -187,8 +189,7 @@ COPY prebuild.jl /install
 #RUN julia prebuild.jl
 
 
-#RUN echo "echo TO LAUNCH JUPYTER: /root/.julia/packages/Conda/m7vem/deps/usr/bin/jupyter lab --ip 0.0.0.0 --port 8888 --allow-root"  >> ~/.bashrc
-RUN echo "echo TO LAUNCH JUPYTER: /root/.julia/conda/3/bin/jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"  >> ~/.bashrc
+RUN echo "echo TO LAUNCH JUPYTER: cd /work;/root/.julia/conda/3/bin/jupyter lab --ip 0.0.0.0 --port 8888 --allow-root"  >> ~/.bashrc
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
 COPY julia-gpu.dockerfile /install

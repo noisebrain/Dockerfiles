@@ -19,18 +19,28 @@ for p in _pkgs
   Pkg.build(p)
 end
 
-#using GZip,ArgParse,Images,ImageMagick,IJulia,HDF5,CMakeWrapper
+using GZip,ArgParse,Images,ImageMagick,IJulia,HDF5,MAT,CMakeWrapper
 
 # pull particular versions, was needed shortly after 1.0 release
 #Pkg.add(PackageSpec(url="https://github.com/denizyuret/AutoGrad.jl",rev="c3a91a8"))	# is 1.01
 #Pkg.add(PackageSpec(url="https://github.com/denizyuret/Knet.jl",rev="348a2fe")) # is 1.0.0 30aug18
 #Pkg.add(PackageSpec(url="https://github.com/denizyuret/Knet.jl",rev="4342175")) # is 1.0.1
-#Pkg.add(PackageSpec("Knet.jl",version="1.0.1"))	# 4342175
+#Pkg.add(PackageSpec(name="Knet",version="1.0.1"))	# 4342175
 #using Knet
 
 Pkg.add("Knet")
 Pkg.test("Knet")	#  Building the CUDAnative run-time library for your sm_61 device, this might take a while...
 #Pkg.build("Knet")
 using Knet
+
+# adding this after in order to let Knet pick a specific version
+Pkg.add("AutoGrad")
+using AutoGrad
+
+using IJulia
+notebook()
+Pkg.add("Conda")
+using Conda
+Conda.add("jupyterlab") # runs conda install -y jupyterlabw
 
 exit(0)
