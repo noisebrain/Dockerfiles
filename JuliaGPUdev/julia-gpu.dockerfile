@@ -1,17 +1,25 @@
-# dec19 works
+# dec19 updated, works
 # dec18 this works, however trying to run vae-mnist fails when loading MAT, extra token error
 
+# first edit CUDA-BASE, JULIA_VERSION, SHASUM
+
 # if julia tar.gz is downloaded in /tmp it will be used
-# sudo docker build . -f julia120-dev-gpu.dockerfile --network host -t julia120-cuda92
-# sudo nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash julia120-cuda92
+# setenv juliaver julia120
+# setenv cudaver cuda92
+# setenv knetver knet132
+# sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}
+# sudo nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}
 # container# /usr/local/bin/julia
 # julia> include("prebuild.jl")
 # julia> using IJulia
 # julia> notebook()	# causes miniconda to be downloaded
+#				Pkg.add("Conda")
+#				using Conda
+#				Conda.add("jupyterlab") # runs conda install -y jupyterlab
 # julia> ^D
 #     BACK TO HOST BASH
-# docker commit bff36d4f0183 julia120-cuda92-knet132
-# sudo nvidia-docker run -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash julia120-cuda92-knet132
+# docker commit bff36d4f0183 ${juliaver}-${cudaver}-${knetver}
+# sudo nvidia-docker run -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-${knetver}
 # container# /root/.julia/conda/3/bin/jupyter notebook -ip 0.0.0.0 -port 8888 -allow-root
 # local browser go to link like http://127.0.0.1:888/?token= ...
 # notebook new>
@@ -59,8 +67,17 @@
 # 
 # Also see a "novol" docker file that attempts to preinstall everything into the interal /pkg folder.
 
+#
+## mv ~/.julia into /PREBUILT, then .startup.jl will copy it back to ~/.julia which is mapped to an ext volume
+# Problem, this increases the size of the image by 2g.
+# COPY startup.jl ${HOME}/.julia/config/startup.jl
+# RUN mv ~/.julia /PREBUILT		# SLOW
+# instead:
+# run once, cp ~/.julia /install/JULIAPKGS
+# run again with -v ${PWD}/JULIAPKGS:/root/.julia 
+
 # ----------------------------------------------------------------
-# ---------------- USAGE -----------------------------------------
+# ---------------- OLD USAGE -----------------------------------------
 # ----------------------------------------------------------------
 #
 # FIRST TIME RUN - INSTALL/COMPILE THINGS
@@ -96,6 +113,7 @@
 #----------------------------------------------------------------
 
 # docker pull nvcr.io/nvidia/pytorch:19.11-py3
+# CUDA-BASE
 FROM nvcr.io/nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04
 #FROM nvcr.io/nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 #FROM nvidia/cuda:8.0-cudnn7-devel-ubuntu16.04
@@ -105,7 +123,6 @@ MAINTAINER j.p.lewis <noisebrain@gmail.com>
 ENV HOME=/root
 ENV JULIA_VERSION=1.2.0
 ENV CUDA_HOME=/usr/local/cuda
-#ARG JULVER=1.2	# not used
 
 
 RUN apt-get update && \
@@ -155,8 +172,8 @@ RUN ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
 WORKDIR /usr/local/bin
 ENV JULIAEXE=/usr/local/bin/julia
 
-## packages
-
+## setup packages
+#ARG JULVER=1.2	# not used
 ## configure jupyter kernel and jupyterlab  <-- worked under earlier versions, now the conda path does not exist
 ## RUN mv ${HOME}/.local/share/jupyter/kernels/julia-${JULVER} ${HOME}/.julia/packages/Conda/m7vem/deps/usr/share/jupyter/kernels && /root/.julia/packages/Conda/m7vem/deps/usr/bin/conda install -y jupyterlab
 
@@ -170,18 +187,10 @@ COPY prebuild.jl /install
 #RUN julia prebuild.jl
 
 
-RUN echo "echo TO LAUNCH JUPYTER: /root/.julia/packages/Conda/m7vem/deps/usr/bin/jupyter lab --ip 0.0.0.0 --port 8888 --allow-root"  >> ~/.bashrc
-
-## mv ~/.julia into /PREBUILT, then .startup.jl will copy it back to ~/.julia which is mapped to an ext volume
-# Problem, this increases the size of the image by 2g.
-# COPY startup.jl ${HOME}/.julia/config/startup.jl
-# RUN mv ~/.julia /PREBUILT		# SLOW
-
-# instead:
-# run once, cp ~/.julia /install/JULIAPKGS
-# run again with -v ${PWD}/JULIAPKGS:/root/.julia 
+#RUN echo "echo TO LAUNCH JUPYTER: /root/.julia/packages/Conda/m7vem/deps/usr/bin/jupyter lab --ip 0.0.0.0 --port 8888 --allow-root"  >> ~/.bashrc
+RUN echo "echo TO LAUNCH JUPYTER: /root/.julia/conda/3/bin/jupyter notebook --ip 0.0.0.0 --port 8888 --allow-root"  >> ~/.bashrc
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
-COPY julia120-dev-gpu.dockerfile /install
+COPY julia-gpu.dockerfile /install
 
 ENTRYPOINT ["/usr/local/bin/julia"]
