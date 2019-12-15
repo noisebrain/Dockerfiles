@@ -1,15 +1,20 @@
-# dec19 built julia120-cuda92-knet132 on MLduck, gpu() returns 0, however no actual tests yet
+# dec19 works
 # dec18 this works, however trying to run vae-mnist fails when loading MAT, extra token error
 
 # if julia tar.gz is downloaded in /tmp it will be used
 # sudo docker build . -f julia120-dev-gpu.dockerfile --network host -t julia120-cuda92
 # sudo nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash julia120-cuda92
-# bash# /usr/local/bin/julia
+# container# /usr/local/bin/julia
 # julia> include("prebuild.jl")
+# julia> using IJulia
+# julia> notebook()	# causes miniconda to be downloaded
 # julia> ^D
 #     BACK TO HOST BASH
 # docker commit bff36d4f0183 julia120-cuda92-knet132
-# sudo nvidia-docker run --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash julia120-cuda92-knet132
+# sudo nvidia-docker run -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash julia120-cuda92-knet132
+# container# /root/.julia/conda/3/bin/jupyter notebook -ip 0.0.0.0 -port 8888 -allow-root
+# local browser go to link like http://127.0.0.1:888/?token= ...
+# notebook new>
 
 # 			OLD, TODO
 # COMMANDLINE: dockNV  --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  julia07-gpu  mlp.jl
