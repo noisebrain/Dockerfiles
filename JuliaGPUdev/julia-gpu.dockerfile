@@ -1,8 +1,9 @@
 # dec19 updated, works
 # dec18 this works, however trying to run vae-mnist fails when loading MAT, extra token error
 
+# ---------------- TO BUILD ----------------
+# 
 # first edit CUDA-BASE, JULIA_VERSION, SHASUM
-
 # if julia tar.gz is downloaded in /tmp it will be used
 # setenv juliaver julia120
 # setenv cudaver cuda92
@@ -21,8 +22,10 @@
 # julia> ^D
 #     BACK TO HOST BASH
 # docker commit bff36d4f0183 ${juliaver}-${cudaver}-${knetver}
+# 
+# ---------------- TO RUN ----------------
 # sudo nvidia-docker run -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-${knetver}
-# container# cd /work; /root/.julia/conda/3/bin/jupyter lab --ip 0.0.0.0 --port 8888 --allow-root # lab|notebook
+# container# cd /work;  /root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root
 # local browser go to link like http://127.0.0.1:888/?token= ...
 # notebook new>
 
@@ -189,7 +192,7 @@ COPY prebuild.jl /install
 #RUN julia prebuild.jl
 
 
-RUN echo "echo TO LAUNCH JUPYTER: cd /work;/root/.julia/conda/3/bin/jupyter lab --ip 0.0.0.0 --port 8888 --allow-root"  >> ~/.bashrc
+RUN echo "echo TO LAUNCH JUPYTER: cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root"  >> ~/.bashrc
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
 COPY julia-gpu.dockerfile /install

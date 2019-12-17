@@ -38,9 +38,9 @@ Pkg.add("AutoGrad")
 using AutoGrad
 
 using IJulia
-notebook()
 Pkg.add("Conda")
 using Conda
 Conda.add("jupyterlab") # runs conda install -y jupyterlabw
 
+notebook()
 exit(0)
