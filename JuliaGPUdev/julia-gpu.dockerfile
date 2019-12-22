@@ -122,9 +122,12 @@
 
 # docker pull nvcr.io/nvidia/pytorch:19.11-py3
 # CUDA-BASE
+#FROM nvcr.io/nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
 FROM nvcr.io/nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04
 #FROM nvcr.io/nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 #FROM nvidia/cuda:8.0-cudnn7-devel-ubuntu16.04
+# selecting 10.1 on a machine with driver396.24/1080 card gave an error when starting container,
+# "...--require=cuda>=10.1 brand=tesla,driver>=384,driver<385 brand=tesla,driver>=396,driver<397 brand=tesla,driver>=410,driver<411"
 
 MAINTAINER j.p.lewis <noisebrain@gmail.com>
 
@@ -138,7 +141,7 @@ RUN apt-get update && \
                     # basic stuff
                     build-essential ca-certificates \
                     # Julia
-                    curl wget gfortran git m4 zlib1g-dev imagemagick hdf5-tools && \
+                    curl nano wget gfortran git m4 zlib1g-dev imagemagick hdf5-tools && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 

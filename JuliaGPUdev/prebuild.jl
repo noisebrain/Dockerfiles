@@ -28,6 +28,11 @@ using GZip,ArgParse,Images,ImageMagick,IJulia,HDF5,MAT,CMakeWrapper
 #Pkg.add(PackageSpec(name="Knet",version="1.0.1"))	# 4342175
 #using Knet
 
+# for julia1.3.0/knet132, 21dec19 needed to edit test/conv.jl, change @test_broken to @test on lines 62,67
+# otherwise it says "passed unexpectedly" but it errors
+#        @test_broken gradcheck(pool, ax; kw=[(:padding,1)])
+# This was weird because nothing in Knet had changed, though maybe was some other package 
+
 Pkg.add("Knet")
 Pkg.test("Knet")	#  Building the CUDAnative run-time library for your sm_61 device, this might take a while...
 #Pkg.build("Knet")
