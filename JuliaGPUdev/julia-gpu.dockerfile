@@ -3,11 +3,14 @@
 
 # ---------------- TO BUILD ----------------
 # 
-# first edit CUDA-BASE, JULIA_VERSION, SHASUM
-# if julia tar.gz is downloaded in /tmp it will be used
-# setenv juliaver julia120
+# 	edit dockerfile:
+#	edit CUDA-BASE, JULIA_VERSION, SHASUM variables
+# 	if julia tar.gz is downloaded in /tmp it will be used
+# 
+# setenv juliaver julia130
 # setenv cudaver cuda92
 # setenv knetver knet132
+# 
 # sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}
 # sudo nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}
 # container# /usr/local/bin/julia
@@ -29,7 +32,7 @@
 # local browser go to link like http://127.0.0.1:888/?token= ...
 # notebook new>
 
-# 			OLD, TODO
+# ----------------OLD, TODO----------------
 # COMMANDLINE: dockNV  --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  julia07-gpu  mlp.jl
 # FIRST RUN, COPY .julia out: dockNV -it --rm -v ${PWD}:/data --entrypoint /bin/bash julia07-gpu
 # 	run once, cp ~/.julia /data/JULIAPKGS
@@ -126,7 +129,7 @@ FROM nvcr.io/nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04
 MAINTAINER j.p.lewis <noisebrain@gmail.com>
 
 ENV HOME=/root
-ENV JULIA_VERSION=1.2.0
+ENV JULIA_VERSION=1.3.0
 ENV CUDA_HOME=/usr/local/cuda
 
 
@@ -164,7 +167,7 @@ RUN apt-get update && \
 #ENV SHASUM="e0e93949753cc4ac46d5f27d7ae213488b3fef5f8e766794df0058e1b3d2f142"  #1.0.2
 #ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"  #1.2.0
 #ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8"  #1.3.0
-ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"
+ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8" 
 
 RUN mkdir /opt/julia-${JULIA_VERSION} && \
     cd /tmp && \
@@ -192,7 +195,7 @@ COPY prebuild.jl /install
 #RUN julia prebuild.jl
 
 
-RUN echo "echo TO LAUNCH JUPYTER: cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root"  >> ~/.bashrc
+RUN echo "echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root\""  >> ~/.bashrc
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
 COPY julia-gpu.dockerfile /install
