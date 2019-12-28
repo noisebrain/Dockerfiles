@@ -13,13 +13,13 @@ using Pkg
 # Pkg.build("MAT")
 # using MAT
 
-_pkgs = ["GZip", "ArgParse","Images","ImageMagick","IJulia","PyPlot", "Plots", "FileIO","HDF5","MAT","CMakeWrapper", "Random", "Statistics"]
+_pkgs = ["GZip", "ArgParse","Images","ImageMagick","Colors","IJulia","PyPlot", "Plots", "FileIO","HDF5","MAT","CMakeWrapper", "Random", "Statistics"]
 for p in _pkgs
   Pkg.add(p)
   Pkg.build(p)
 end
 
-using GZip,ArgParse,Images,ImageMagick,IJulia,HDF5,MAT,CMakeWrapper,Random,Statistics
+using GZip,ArgParse,Images,ImageMagick,Colors,IJulia,PyPlot,FileIO,HDF5,MAT,CMakeWrapper,Random,Statistics
 
 # pull particular versions, was needed shortly after 1.0 release
 #Pkg.add(PackageSpec(url="https://github.com/denizyuret/AutoGrad.jl",rev="c3a91a8"))	# is 1.01

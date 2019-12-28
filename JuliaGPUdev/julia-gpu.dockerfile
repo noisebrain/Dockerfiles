@@ -13,11 +13,13 @@
 # 
 # sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}
 # sudo nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}
+# container# cd /install
 # container# /usr/local/bin/julia
 # julia> include("prebuild.jl")
-# todo merge this into prebuild:
-# julia> using IJulia
-# julia> notebook()	# causes miniconda to be downloaded
+#    may have to stop to fix knet test errors
+# //todo merge this into prebuild:
+# //julia> using IJulia
+# //julia> notebook()	# causes miniconda to be downloaded
 #				Pkg.add("Conda")
 #				using Conda
 #				Conda.add("jupyterlab") # runs conda install -y jupyterlab
@@ -191,7 +193,7 @@ ENV JULIAEXE=/usr/local/bin/julia
 
 ## execution
 
-VOLUME /install
+# VOLUME /install	!NO
 WORKDIR /install
 COPY prebuild.jl /install
 #RUN ./julia -e 'using Pkg; Pkg.add("ArgParse")'
@@ -203,4 +205,5 @@ RUN echo "echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-la
 COPY startup.jl ${HOME}/.julia/config/startup.jl
 COPY julia-gpu.dockerfile /install
 
+WORKDIR /work
 ENTRYPOINT ["/usr/local/bin/julia"]
