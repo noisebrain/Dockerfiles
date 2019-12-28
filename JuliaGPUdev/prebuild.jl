@@ -13,7 +13,7 @@ using Pkg
 # Pkg.build("MAT")
 # using MAT
 
-_pkgs = ["GZip", "ArgParse","Images","ImageMagick","Colors","IJulia","PyPlot", "Plots", "FileIO","HDF5","MAT","CMakeWrapper", "Random", "Statistics"]
+_pkgs = ["GZip", "ArgParse","Images","ImageMagick","Colors","IJulia","PyPlot", "Plots", "FileIO","HDF5","MAT","CMakeWrapper", "Random", "Statistics","Printf"]
 for p in _pkgs
   Pkg.add(p)
   Pkg.build(p)
