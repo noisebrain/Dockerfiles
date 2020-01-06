@@ -10,20 +10,17 @@
 # setenv juliaver julia130
 # setenv cudaver cuda92
 # setenv knetver knet132
+#
+#### The name -common denotes that common packages (IJulia, PyPlot, etc) have been preinstalled 
 # 
-# sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}
-# sudo nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}
+# sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}-common
+# 
+#### INSTALL KNET
+# sudo nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-commmon
 # container# cd /install
 # container# /usr/local/bin/julia
 # julia> include("prebuild.jl")
 #    may have to stop to fix knet test errors
-# //todo merge this into prebuild:
-# //julia> using IJulia
-# //julia> notebook()	# causes miniconda to be downloaded
-#				Pkg.add("Conda")
-#				using Conda
-#				Conda.add("jupyterlab") # runs conda install -y jupyterlab
-#				^^^^ this worked to add jupyterlab!	
 # julia> ^D
 #     BACK TO HOST BASH
 # docker commit bff36d4f0183 ${juliaver}-${cudaver}-${knetver}
@@ -195,15 +192,16 @@ ENV JULIAEXE=/usr/local/bin/julia
 
 # VOLUME /install	!NO
 WORKDIR /install
-COPY prebuild.jl /install
-#RUN ./julia -e 'using Pkg; Pkg.add("ArgParse")'
+COPY julia-gpu.dockerfile prebuild.jl /install/
 #RUN julia prebuild.jl
 
+RUN julia -e 'using Pkg; pkg"add GZip; add ArgParse; add Images; add ImageMagick; add IJulia; add PyPlot; add FileIO; add HDF5; add MAT; add CMakeWrapper; add Random; add Statistics; add BSON; precompile"'
+# jan20 do not add Colors: causes a conflict with Flux0.9/Metalhead, 
+# install metalhead and let that install Colors.
 
 RUN echo "echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root\""  >> ~/.bashrc
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
-COPY julia-gpu.dockerfile /install
 
 WORKDIR /work
 ENTRYPOINT ["/usr/local/bin/julia"]
