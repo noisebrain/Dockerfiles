@@ -1,3 +1,7 @@
+# TODO add all the non-gpu packages as part of the docker build,
+# include only the gpu packages here.
+# That will also make the base image in common with Flux/Knet/other
+
 println("running prebuild.jl")
 
 using Pkg
@@ -13,13 +17,19 @@ using Pkg
 # Pkg.build("MAT")
 # using MAT
 
-_pkgs = ["GZip", "ArgParse","Images","ImageMagick","Colors","IJulia","PyPlot", "Plots", "FileIO","HDF5","MAT","CMakeWrapper", "Random", "Statistics"]
+# can also do this as a commandline e.g.
+#	!julia -e 'using Pkg; pkg"add IJulia; add Pyplot; precompile"'
+# unfortunately that cannot run in the docker build if adding packages that need to find the GPU,
+# unless nvidia-docker can be used for the build?
+
+#=
+_pkgs = ["GZip", "ArgParse","Images","ImageMagick","Colors","IJulia","PyPlot", "Plots", "FileIO","HDF5","MAT","CMakeWrapper", "Random", "Statistics"]	# BSON
 for p in _pkgs
   Pkg.add(p)
   Pkg.build(p)
 end
-
 using GZip,ArgParse,Images,ImageMagick,Colors,IJulia,PyPlot,FileIO,HDF5,MAT,CMakeWrapper,Random,Statistics
+=#
 
 # pull particular versions, was needed shortly after 1.0 release
 #Pkg.add(PackageSpec(url="https://github.com/denizyuret/AutoGrad.jl",rev="c3a91a8"))	# is 1.01
