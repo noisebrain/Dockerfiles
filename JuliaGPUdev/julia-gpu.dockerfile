@@ -195,11 +195,12 @@ WORKDIR /install
 COPY julia-gpu.dockerfile prebuild.jl /install/
 #RUN julia prebuild.jl
 
-RUN julia -e 'using Pkg; pkg"add GZip; add ArgParse; add Images; add ImageMagick; add IJulia; add PyPlot; add FileIO; add HDF5; add MAT; add CMakeWrapper; add Random; add Statistics; add BSON; precompile"'
+RUN julia -e 'using Pkg; pkg"add GZip; add ArgParse; add Images; add ImageMagick; add IJulia; add PyPlot; add FileIO; add HDF5; add MAT; add BSON; add CMakeWrapper; add Random; add Statistics; add Distributions; precompile"'
 # jan20 do not add Colors: causes a conflict with Flux0.9/Metalhead, 
 # install metalhead and let that install Colors.
 
-RUN echo "echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root\""  >> ~/.bashrc
+# NNlib had a threading bug julia1.3/jan20 
+RUN echo "setenv JULIA_NUM_THREADS 1;echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root\""  >> ~/.bashrc
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
 
