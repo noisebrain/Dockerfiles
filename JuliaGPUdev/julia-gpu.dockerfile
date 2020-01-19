@@ -7,7 +7,7 @@
 #	edit CUDA-BASE, JULIA_VERSION, SHASUM variables
 # 	if julia tar.gz is downloaded in /tmp it will be used
 # 
-# setenv juliaver julia130
+# setenv juliaver julia131
 # setenv cudaver cuda92
 # setenv knetver knet132
 #
@@ -131,7 +131,7 @@ FROM nvcr.io/nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04
 MAINTAINER j.p.lewis <noisebrain@gmail.com>
 
 ENV HOME=/root
-ENV JULIA_VERSION=1.3.0
+ENV JULIA_VERSION=1.3.1
 ENV CUDA_HOME=/usr/local/cuda
 
 
@@ -169,7 +169,9 @@ RUN apt-get update && \
 #ENV SHASUM="e0e93949753cc4ac46d5f27d7ae213488b3fef5f8e766794df0058e1b3d2f142"  #1.0.2
 #ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"  #1.2.0
 #ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8"  #1.3.0
-ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8" 
+#ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"  #1.3.1
+# must strip off the closing comment here
+ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"
 
 RUN mkdir /opt/julia-${JULIA_VERSION} && \
     cd /tmp && \
