@@ -2,7 +2,7 @@
 # include only the gpu packages here.
 # That will also make the base image in common with Flux/Knet/other
 
-println("running prebuild.jl")
+println("running addpackages.jl")  # renamed from prebuild.jl
 
 using Pkg
 
@@ -43,14 +43,31 @@ using GZip,ArgParse,Images,ImageMagick,Colors,IJulia,PyPlot,FileIO,HDF5,MAT,CMak
 #        @test_broken gradcheck(pool, ax; kw=[(:padding,1)])
 # This was weird because nothing in Knet had changed, though maybe was some other package 
 
-Pkg.add("Knet")
-Pkg.test("Knet")	#  Building the CUDAnative run-time library for your sm_61 device, this might take a while...
+if true
+  Pkg.add("Knet")
+  Pkg.test("Knet")	#  Building the CUDAnative run-time library for your sm_61 device, this might take a while...
 #Pkg.build("Knet")
-using Knet
+  using Knet
+  # adding this after in order to let Knet pick a specific version
+  Pkg.add("AutoGrad")
+  using AutoGrad
+else
+  #Pkg.add(PackageSpec(name = "Flux",version="0.9"))
+  Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
+  Pkg.add("MetalHead")
+end
 
-# adding this after in order to let Knet pick a specific version
-Pkg.add("AutoGrad")
-using AutoGrad
+# jan20 do not add Colors,Images,Distributions -
+# causes a conflict with Flux0.9/Metalhead, 
+# install Flux first metalhead and then install these
+
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper"]
+for p in _pkgs
+  Pkg.add(p)
+  Pkg.build(p)
+end
+using Images,ImageMagick,FileIO,HDF5,MAT,BSON,Colors,Random,Distributions,Statistics,KernelDensity,GZip,ArgParse,Printf,Plots,PyPlot,CMakeWrapper
+
 
 using IJulia
 Pkg.add("Conda")

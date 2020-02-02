@@ -16,17 +16,17 @@
 # sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}-common
 # 
 #### INSTALL KNET
-# sudo nvidia-docker run --rm -it --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-commmon
+# sudo docker run --runtime=nvidia --rm -it --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-common
 # container# cd /install
 # container# /usr/local/bin/julia
-# julia> include("prebuild.jl")
+# julia> include("addpackages.jl")
 #    may have to stop to fix knet test errors
 # julia> ^D
 #     BACK TO HOST BASH
 # docker commit bff36d4f0183 ${juliaver}-${cudaver}-${knetver}
 # 
 # ---------------- TO RUN ----------------
-# sudo nvidia-docker run -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-${knetver}
+# sudo docker run --runtime=nvidia -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-${knetver}
 # container# cd /work;  /root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root
 # local browser go to link like http://127.0.0.1:888/?token= ...
 # notebook new>
@@ -194,12 +194,17 @@ ENV JULIAEXE=/usr/local/bin/julia
 
 # VOLUME /install	!NO
 WORKDIR /install
-COPY julia-gpu.dockerfile prebuild.jl /install/
-#RUN julia prebuild.jl
+COPY julia-gpu.dockerfile addpackages.jl /install/
+#RUN julia addpackages.jl
 
-RUN julia -e 'using Pkg; pkg"add GZip; add ArgParse; add Images; add ImageMagick; add IJulia; add Plots; add FileIO; add HDF5; add MAT; add BSON; add CMakeWrapper; add Random; add Statistics; add Distributions; add KernelDensity; precompile"'
-# jan20 do not add Colors: causes a conflict with Flux0.9/Metalhead, 
-# install metalhead and let that install Colors.
+#		move toward adding these packages AFTER flux/knet
+#		because flux/knet have particular requirements for some of these
+#		(Images,Colors,Distributions)
+#
+# RUN julia -e 'using Pkg; pkg"add GZip; add ArgParse; add Printf; add Images; add ImageMagick; add IJulia; add PyPlot; add Plots; add FileIO; add HDF5; add MAT; add BSON; add CMakeWrapper; add Random; add Statistics; add KernelDensity; precompile"'
+# jan20 do not add Colors,Images,Distributions -
+# causes a conflict with Flux0.9/Metalhead, 
+# install Flux first metalhead and then install these
 
 # NNlib had a threading bug julia1.3/jan20 
 RUN echo "JULIA_NUM_THREADS=1;export JULIA_NUM_THREADS;echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root\""  >> ~/.bashrc
