@@ -153,6 +153,7 @@ RUN apt-get update && \
 #- WORKDIR /opt/julia
 #- RUN make all -j$(nproc) \
 #-         MARCH=x86-64 \
+#-         USE_GPL_LIBS=0 \
 #-         JULIA_CPU_TARGET=x86-64 && \
 #-     rm -rf deps/scratch deps/srccache usr-staging
 #-

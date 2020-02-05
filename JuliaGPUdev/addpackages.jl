@@ -43,7 +43,7 @@ using GZip,ArgParse,Images,ImageMagick,Colors,IJulia,PyPlot,FileIO,HDF5,MAT,CMak
 #        @test_broken gradcheck(pool, ax; kw=[(:padding,1)])
 # This was weird because nothing in Knet had changed, though maybe was some other package 
 
-if true
+if false
   Pkg.add("Knet")
   Pkg.test("Knet")	#  Building the CUDAnative run-time library for your sm_61 device, this might take a while...
 #Pkg.build("Knet")
@@ -51,19 +51,26 @@ if true
   # adding this after in order to let Knet pick a specific version
   Pkg.add("AutoGrad")
   using AutoGrad
-else
+end
+if false
   #Pkg.add(PackageSpec(name = "Flux",version="0.9"))
   Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
   Pkg.add("MetalHead")
+end
+if true
+  Pkg.activate(".")
+  Pkg.instantiate(;varbose=true)
+  using CuArrays
+  using Flux
 end
 
 # jan20 do not add Colors,Images,Distributions -
 # causes a conflict with Flux0.9/Metalhead, 
 # install Flux first metalhead and then install these
 
-_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper"]
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Ijulia"]
 for p in _pkgs
-  Pkg.add(p)
+  Pkg.installed(p)==nothing && Pkg.add(p)
   Pkg.build(p)
 end
 using Images,ImageMagick,FileIO,HDF5,MAT,BSON,Colors,Random,Distributions,Statistics,KernelDensity,GZip,ArgParse,Printf,Plots,PyPlot,CMakeWrapper
