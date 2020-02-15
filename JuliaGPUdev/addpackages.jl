@@ -56,6 +56,12 @@ if false
   #Pkg.add(PackageSpec(name = "Flux",version="0.9"))
   Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
   Pkg.add("MetalHead")
+  Pkg.add("CuArrays")
+  Pkg.build("CuArrays")
+  Pkg.test("CuArrays")
+  #Pkg.add("Zygote")
+  Pkg.test("Flux")
+  using Flux
 end
 if true
   Pkg.activate(".")
