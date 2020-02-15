@@ -68,12 +68,12 @@ end
 # causes a conflict with Flux0.9/Metalhead, 
 # install Flux first metalhead and then install these
 
-_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Ijulia"]
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Ijulia"]
 for p in _pkgs
   Pkg.installed(p)==nothing && Pkg.add(p)
   Pkg.build(p)
 end
-using Images,ImageMagick,FileIO,HDF5,MAT,BSON,Colors,Random,Distributions,Statistics,KernelDensity,GZip,ArgParse,Printf,Plots,PyPlot,CMakeWrapper
+using Images,ImageMagick,FileIO,HDF5,MAT,NPZ,BSON,Colors,Random,Distributions,Statistics,KernelDensity,GZip,ArgParse,Printf,Plots,PyPlot,CMakeWrapper
 
 
 using IJulia
