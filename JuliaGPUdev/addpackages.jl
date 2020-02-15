@@ -43,7 +43,7 @@ using GZip,ArgParse,Images,ImageMagick,Colors,IJulia,PyPlot,FileIO,HDF5,MAT,CMak
 #        @test_broken gradcheck(pool, ax; kw=[(:padding,1)])
 # This was weird because nothing in Knet had changed, though maybe was some other package 
 
-if true
+if false
   Pkg.add("Knet")
   Pkg.test("Knet")	#  Building the CUDAnative run-time library for your sm_61 device, this might take a while...
 #Pkg.build("Knet")
@@ -55,6 +55,12 @@ else
   #Pkg.add(PackageSpec(name = "Flux",version="0.9"))
   Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
   Pkg.add("MetalHead")
+  Pkg.add("CuArrays")
+  Pkg.build("CuArrays")
+  Pkg.test("CuArrays")
+  #Pkg.add("Zygote")
+  Pkg.test("Flux")
+  using Flux
 end
 
 # jan20 do not add Colors,Images,Distributions -

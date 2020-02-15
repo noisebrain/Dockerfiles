@@ -16,7 +16,7 @@
 # sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}-common
 # 
 #### INSTALL KNET
-# sudo docker run --runtime=nvidia --rm -it --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-common
+# sudo docker run --runtime=nvidia --rm -it --ipc=host -v ${PWD}:/work --entrypoint /bin/bash ${juliaver}-${cudaver}-common
 # container# cd /install
 # container# /usr/local/bin/julia
 # julia> include("addpackages.jl")
