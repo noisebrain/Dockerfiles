@@ -52,18 +52,18 @@ if false
   Pkg.add("AutoGrad")
   using AutoGrad
 end
-if false
-  #Pkg.add(PackageSpec(name = "Flux",version="0.9"))
-  Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
-  Pkg.add("MetalHead")
+if true
+  Pkg.add(PackageSpec(name = "Flux",version="0.9"))
+  #Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
+  Pkg.add("Metalhead")
   Pkg.add("CuArrays")
   Pkg.build("CuArrays")
   Pkg.test("CuArrays")
   #Pkg.add("Zygote")
-  Pkg.test("Flux")
+  Pkg.test("Flux") # 0.9 gives 4 errors in RNN, just ignore and manually run the sequel
   using Flux
 end
-if true
+if false
   Pkg.activate(".")
   Pkg.instantiate(;varbose=true)
   using CuArrays
@@ -76,7 +76,10 @@ end
 
 _pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Ijulia"]
 for p in _pkgs
-  Pkg.installed(p)==nothing && Pkg.add(p)
+  #Pkg.installed(p)==nothing && Pkg.add(p)
+  if !in(p, keys(Pkg.installed()))
+    Pkg.add(p)
+  end
   Pkg.build(p)
 end
 using Images,ImageMagick,FileIO,HDF5,MAT,NPZ,BSON,Colors,Random,Distributions,Statistics,KernelDensity,GZip,ArgParse,Printf,Plots,PyPlot,CMakeWrapper
@@ -85,7 +88,9 @@ using Images,ImageMagick,FileIO,HDF5,MAT,NPZ,BSON,Colors,Random,Distributions,St
 using IJulia
 Pkg.add("Conda")
 using Conda
-Conda.add("jupyterlab") # runs conda install -y jupyterlabw
+Conda.add("jupyterlab") # runs conda install -y jupyterlab
 
 notebook()
+
+println("now run setupemacskeys.sh if you like")
 exit(0)

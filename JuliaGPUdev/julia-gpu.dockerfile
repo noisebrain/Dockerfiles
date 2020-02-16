@@ -4,25 +4,28 @@
 # ---------------- TO BUILD ----------------
 # 
 # 	edit dockerfile:
-#	edit CUDA-BASE, JULIA_VERSION, SHASUM variables
-# 	if julia tar.gz is downloaded in /tmp it will be used
+#	1. edit CUDA-BASE, JULIA_VERSION, SHASUM variables, 
+# 	2. decide if buildfromsource or download, uncomment appropriate block
+# 	3. setenv in the build shell:
+# 		setenv juliaver julia131
+# 		setenv cudaver cuda92
+# 		setenv knetver knet132
+# 	4. edit addpackages, pick flux or knet version, follow install setps below
+#### if notbuildfromsource and julia tar.gz is downloaded in /tmp it will be used
+#### OBSOLETE The docker image name *-common denotes that common packages (IJulia, PyPlot, etc) have been preinstalled. Found that it is better to install common packages AFTER installing flux or knet
 # 
-# setenv juliaver julia131
-# setenv cudaver cuda92
-# setenv knetver knet132
-#
-#### The name -common denotes that common packages (IJulia, PyPlot, etc) have been preinstalled 
+# sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}
 # 
-# sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}-common
+# ---------------- POST BUILD INSTALL PACKAGES ----------------
 # 
-#### INSTALL KNET
 # sudo docker run --runtime=nvidia --rm -it --ipc=host -v ${PWD}:/work --entrypoint /bin/bash ${juliaver}-${cudaver}-common
 # container# cd /install
 # container# /usr/local/bin/julia
 # julia> include("addpackages.jl")
 #    may have to stop to fix knet test errors
-# julia> ^D
+# julia> ^D	# BE SURE TO QUIT BEFORE COMMITTING
 #     BACK TO HOST BASH
+# /work# setupemacskeys.sh	# jupyter emacs keys binding (optional)
 # docker commit bff36d4f0183 ${juliaver}-${cudaver}-${knetver}
 # 
 # ---------------- TO RUN ----------------
@@ -134,7 +137,6 @@ ENV HOME=/root
 ENV JULIA_VERSION=1.3.1
 ENV CUDA_HOME=/usr/local/cuda
 
-
 RUN apt-get update && \
     apt-get install --yes --no-install-recommends \
                     # basic stuff
@@ -145,45 +147,58 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 ## ---------------- BUILD FROM SOURCE ----------------
-#-WORKDIR /opt
-#- RUN git clone https://github.com/JuliaLang/julia.git && \
-#-     cd julia && \
-#-     git checkout v${JULIA_VERSION}
-#- ## build
-#- WORKDIR /opt/julia
-#- RUN make all -j$(nproc) \
-#-         MARCH=x86-64 \
-#-         USE_GPL_LIBS=0 \
-#-         JULIA_CPU_TARGET=x86-64 && \
-#-     rm -rf deps/scratch deps/srccache usr-staging
-#-
-#-WORKDIR /opt/julia/usr/bin
-#-ENV JULIAEXE=/opt/julia/usr/bin/julia
-
+## (un)comment from here
+WORKDIR /opt
+RUN apt-get update && \
+	apt-get install --yes --no-install-recommends \
+	apt-utils cmake python
+RUN git clone https://github.com/JuliaLang/julia.git && \
+    cd julia && \
+    git checkout v${JULIA_VERSION}
+## build
+WORKDIR /opt/julia
+RUN make CXXFLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 all -j$(nproc) \
+        MARCH=x86-64 \
+        USE_GPL_LIBS=0 \
+        JULIA_CPU_TARGET=x86-64 && \
+    rm -rf deps/scratch deps/srccache usr-staging
+# 
+RUN ln -fs /opt/julia/usr/bin/julia /usr/local/bin/julia
+WORKDIR /usr/local/bin
+ENV JULIAEXE=/usr/local/bin/julia
+#
+## (un)comment to here
+# no, symlink to /usr/local
+# #-WORKDIR /opt/julia/usr/bin
+# #-ENV JULIAEXE=/opt/julia/usr/bin/julia
+## ---------------- END BUILD FROM SOURCE ----------------
 
 ## ---------------- DOWNLOAD JULIA ----------------
 # this unpacks into /opt/julia-${JULIA_VERSION} , ../bin/julia is the executable
+## (un)comment from here
+# # retrieve a checksum from url like this: https://julialang-s3.julialang.org/bin/checksums/julia-1.2.0.sha256
+# #ENV SHASUM="d20e6984bcf8c3692d853a9922e2cf1de19b91201cb9e396d9264c32cebedc46"  #0.6.4
+# #ENV SHASUM="35211bb89b060bfffe81e590b8aeb8103f059815953337453f632db9d96c1bd6"  #0.7.0
+# #ENV SHASUM="e0e93949753cc4ac46d5f27d7ae213488b3fef5f8e766794df0058e1b3d2f142"  #1.0.2
+# #ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"  #1.2.0
+# #ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8"  #1.3.0
+# #ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"  #1.3.1
+# # must strip off the closing comment here
+# ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"
 
-# retrieve a checksum from url like this: https://julialang-s3.julialang.org/bin/checksums/julia-1.2.0.sha256
-#ENV SHASUM="d20e6984bcf8c3692d853a9922e2cf1de19b91201cb9e396d9264c32cebedc46"  #0.6.4
-#ENV SHASUM="35211bb89b060bfffe81e590b8aeb8103f059815953337453f632db9d96c1bd6"  #0.7.0
-#ENV SHASUM="e0e93949753cc4ac46d5f27d7ae213488b3fef5f8e766794df0058e1b3d2f142"  #1.0.2
-#ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"  #1.2.0
-#ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8"  #1.3.0
-#ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"  #1.3.1
-# must strip off the closing comment here
-ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"
-
-RUN mkdir /opt/julia-${JULIA_VERSION} && \
-    cd /tmp && \
-        [ -f julia-${JULIA_VERSION}-linux-x86_64.tar.gz ] || ( wget -q https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz ) && \
-    echo "${SHASUM} *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
-    tar xzf julia-${JULIA_VERSION}-linux-x86_64.tar.gz -C /opt/julia-${JULIA_VERSION} --strip-components=1 && \
-    rm /tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
-RUN ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
-
-WORKDIR /usr/local/bin
-ENV JULIAEXE=/usr/local/bin/julia
+# RUN mkdir /opt/julia-${JULIA_VERSION} && \
+#     cd /tmp && \
+#         [ -f julia-${JULIA_VERSION}-linux-x86_64.tar.gz ] || ( wget -q https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz ) && \
+#     echo "${SHASUM} *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
+#     tar xzf julia-${JULIA_VERSION}-linux-x86_64.tar.gz -C /opt/julia-${JULIA_VERSION} --strip-components=1 && \
+#     rm /tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
+# 
+# RUN ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
+# WORKDIR /usr/local/bin
+# ENV JULIAEXE=/usr/local/bin/julia
+# 
+## (un)comment to here
+## ---------------- END DOWNLOAD JULIA ----------------
 
 ## setup packages
 #ARG JULVER=1.2	# not used
@@ -195,7 +210,7 @@ ENV JULIAEXE=/usr/local/bin/julia
 
 # VOLUME /install	!NO
 WORKDIR /install
-COPY julia-gpu.dockerfile addpackages.jl /install/
+COPY julia-gpu.dockerfile addpackages.jl emacskeys emacskeys.LICENSE setupemacskeys.sh /install/
 #RUN julia addpackages.jl
 
 #		move toward adding these packages AFTER flux/knet
@@ -206,6 +221,16 @@ COPY julia-gpu.dockerfile addpackages.jl /install/
 # jan20 do not add Colors,Images,Distributions -
 # causes a conflict with Flux0.9/Metalhead, 
 # install Flux first metalhead and then install these
+
+# no, do this after addpackages!
+# optionally install jupyterlab emacskeys binding - 
+# (but github.com/dzop/emacs-jupyter is better)
+# RUN 	/root/.julia/conda/3/bin/conda install nodejs && \
+# 	export PATH="${PATH}:/root/.julia/conda/3/bin" && \
+# 	jupyter labextension install jupyterlab-emacskeys && \
+# 	cp /install/emacskeys /root/.jupyter/lab/user-settings/@jupyterlab/shortcuts-extensions/shortcuts.jupyterlab-settings && \
+# 	gsettings set org.gnome.desktop.interface gtk-key-theme "Emacs"
+
 
 # NNlib had a threading bug julia1.3/jan20 
 RUN echo "JULIA_NUM_THREADS=1;export JULIA_NUM_THREADS;echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root\""  >> ~/.bashrc
