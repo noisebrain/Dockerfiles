@@ -70,11 +70,25 @@ if false
   using Flux
 end
 
+using Flux      # if the Pkg.test fails, appears that the "using" above is never invoked
+
+# get Conda+PyCall setup before adding PyPlot, because it looks for matplotlib
+using Pkg
+Pkg.add("Conda")
+using Conda
+Conda.add("matplotlib")
+# if building from source there is a python2 in /usr/bin, force use of the conda python3
+ENV["PYTHON"] = "/root/.julia/conda/3/bin/python3"	
+Pkg.add("PyCall")
+Pkg.build("PyCall")
+using PyCall
+@assert PyCall.conda == true
+
 # jan20 do not add Colors,Images,Distributions -
 # causes a conflict with Flux0.9/Metalhead, 
 # install Flux first metalhead and then install these
 
-_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Ijulia"]
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","IJulia", "WebIO"]
 for p in _pkgs
   #Pkg.installed(p)==nothing && Pkg.add(p)
   if !in(p, keys(Pkg.installed()))
@@ -89,6 +103,10 @@ using IJulia
 Pkg.add("Conda")
 using Conda
 Conda.add("jupyterlab") # runs conda install -y jupyterlab
+
+# conda install -y nodejs
+using WebIO
+WebIO.install_jupyter_labextension()
 
 notebook()
 

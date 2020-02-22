@@ -7,9 +7,8 @@
 #	1. edit CUDA-BASE, JULIA_VERSION, SHASUM variables, 
 # 	2. decide if buildfromsource or download, uncomment appropriate block
 # 	3. setenv in the build shell:
-# 		setenv juliaver julia131
+# 		setenv juliaver julia131   	# or julia131fs for "from source"
 # 		setenv cudaver cuda92
-# 		setenv knetver knet132
 # 	4. edit addpackages, pick flux or knet version, follow install setps below
 #### if notbuildfromsource and julia tar.gz is downloaded in /tmp it will be used
 #### OBSOLETE The docker image name *-common denotes that common packages (IJulia, PyPlot, etc) have been preinstalled. Found that it is better to install common packages AFTER installing flux or knet
@@ -18,11 +17,11 @@
 # 
 # ---------------- POST BUILD INSTALL PACKAGES ----------------
 # 
-# sudo docker run --runtime=nvidia --rm -it --ipc=host -v ${PWD}:/work --entrypoint /bin/bash ${juliaver}-${cudaver}-common
-# container# cd /install
-# container# /usr/local/bin/julia
+# sudo docker run --runtime=nvidia --rm -it --ipc=host -v ${PWD}:/work --entrypoint /bin/bash ${juliaver}-${cudaver}
+# container# cd /install   # or make sure addpackages.jl is in /work
+# container# JULIA_DEBUG=CUDAapi /usr/local/bin/julia
 # julia> include("addpackages.jl")
-#    may have to stop to fix knet test errors
+#    may have to stop to fix flux or knet test errors and walk though this manually
 # julia> ^D	# BE SURE TO QUIT BEFORE COMMITTING
 #     BACK TO HOST BASH
 # /work# setupemacskeys.sh	# jupyter emacs keys binding (optional)
@@ -123,6 +122,7 @@
 #----------------------------------------------------------------
 
 # docker pull nvcr.io/nvidia/pytorch:19.11-py3
+# there is a julia docker image, it would not have cuda drivers
 # CUDA-BASE
 #FROM nvcr.io/nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
 FROM nvcr.io/nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04
@@ -145,8 +145,11 @@ RUN apt-get update && \
                     curl nano wget gfortran git m4 zlib1g-dev imagemagick hdf5-tools && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
+# always clean after installing!
 
 ## ---------------- BUILD FROM SOURCE ----------------
+## Note the build fails without python, but as a result PyPlot will find this python rather than the one installed by Conda.
+## Thus need to either install matplotlib here, or set the path to the Conda python in addpackages.jl
 ## (un)comment from here
 WORKDIR /opt
 RUN apt-get update && \
