@@ -1,5 +1,6 @@
 # dec19 updated, works
 # dec18 this works, however trying to run vae-mnist fails when loading MAT, extra token error
+# messy file serves as both dockerfile and instructions+notes
 
 # ---------------- TO BUILD ----------------
 # 
@@ -9,11 +10,14 @@
 # 	3. setenv in the build shell:
 # 		setenv juliaver julia131   	# or julia131fs for "from source"
 # 		setenv cudaver cuda92
+#		setenv fluxver flux09nornn
 # 	4. edit addpackages, pick flux or knet version, follow install setps below
 #### if notbuildfromsource and julia tar.gz is downloaded in /tmp it will be used
 #### OBSOLETE The docker image name *-common denotes that common packages (IJulia, PyPlot, etc) have been preinstalled. Found that it is better to install common packages AFTER installing flux or knet
 # 
 # sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}
+#  				OR
+# sudo docker build . -f julia-gpu-juno.dockerfile --network host -t ${juliaver}-${cudaver}-juno
 # 
 # ---------------- POST BUILD INSTALL PACKAGES ----------------
 # 
@@ -28,7 +32,11 @@
 # docker commit bff36d4f0183 ${juliaver}-${cudaver}-${knetver}
 # 
 # ---------------- TO RUN ----------------
-# sudo docker run --runtime=nvidia -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-${knetver}
+# for juypter:
+# sudo docker run --runtime=nvidia -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-${fluxver}
+# for juno
+# sudo docker run --runtime=nvidia -p 7776:22 --rm -it -v ${PWD}:/work --ipc=host ${juliaver}-${cudaver}-juno-${fluxver}
+#
 # container# cd /work;  /root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root
 # local browser go to link like http://127.0.0.1:888/?token= ...
 # notebook new>
@@ -213,7 +221,7 @@ ENV JULIAEXE=/usr/local/bin/julia
 
 # VOLUME /install	!NO
 WORKDIR /install
-COPY julia-gpu.dockerfile addpackages.jl emacskeys emacskeys.LICENSE setupemacskeys.sh /install/
+COPY julia-gpu.dockerfile julia-gpu-juno.dockerfile addpackages.jl emacskeys emacskeys.LICENSE setupemacskeys.sh /install/
 #RUN julia addpackages.jl
 
 #		move toward adding these packages AFTER flux/knet
@@ -223,7 +231,7 @@ COPY julia-gpu.dockerfile addpackages.jl emacskeys emacskeys.LICENSE setupemacsk
 # RUN julia -e 'using Pkg; pkg"add GZip; add ArgParse; add Printf; add Images; add ImageMagick; add IJulia; add PyPlot; add Plots; add FileIO; add HDF5; add MAT; add BSON; add CMakeWrapper; add Random; add Statistics; add KernelDensity; precompile"'
 # jan20 do not add Colors,Images,Distributions -
 # causes a conflict with Flux0.9/Metalhead, 
-# install Flux first metalhead and then install these
+# install Flux, metalhead FIRST and then install these
 
 # no, do this after addpackages!
 # optionally install jupyterlab emacskeys binding - 
@@ -240,5 +248,40 @@ RUN echo "JULIA_NUM_THREADS=1;export JULIA_NUM_THREADS;echo TO LAUNCH JUPYTER: \
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
 
+
+# setup ssh server for juno access
+# adapted from guide at https://techytok.com/from-zero-to-julia-using-docker/
+# NOTE there was an upgrade here. It causes cuda stuff to be upgraded
+# 		&& apt-get upgrade -y 
+# removed, assume that the nvidia docker base image is best
+RUN apt-get update &&  apt-get install --yes --no-install-recommends \
+	openssh-server bzip2 gnupg dirmngr apt-transport-https tmux && \
+	# locales
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+# always clean after installing!
+
+RUN mkdir /var/run/sshd && \
+    echo 'root:XXXXXXXX' |chpasswd && \
+    sed -ri 's/^#?PermitRootLogin\s+.*/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    sed -ri 's/UsePAM yes/#UsePAM yes/g' /etc/ssh/sshd_config && \
+    mkdir /root/.ssh
+
+# for ssh server
+EXPOSE 22 
+
+# recommended by the guide, but maybe not needed if only english is used?
+#add support for English (for tmux) 
+# locale.gen file contains this line: en_US.UTF-8 UTF-8
+# COPY locale.gen /etc/locale.gen
+# RUN locale-gen
+
+RUN useradd -ms /bin/bash debugger && echo 'debugger:XXXXXXXX' | chpasswd
+
 WORKDIR /work
-ENTRYPOINT ["/usr/local/bin/julia"]
+#ENTRYPOINT ["/usr/local/bin/julia"]
+
+CMD ["/usr/sbin/sshd", "-D"]
+
+# getting this error when ENTRYPOINT is set as well as cmd:
+# ERROR: LoadError: syntax: invalid character "" near column 1
