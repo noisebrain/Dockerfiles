@@ -4,7 +4,6 @@
 
 println("running addpackages.jl")  # renamed from prebuild.jl
 
-using Pkg
 
 # dec18 suggested workaround for a problem building MAT, comes up while running vae-mnist.jl.
 # did not help, though not clear if it correctly loaded the right version
@@ -44,6 +43,7 @@ using GZip,ArgParse,Images,ImageMagick,Colors,IJulia,PyPlot,FileIO,HDF5,MAT,CMak
 # This was weird because nothing in Knet had changed, though maybe was some other package 
 
 if false
+  using Pkg
   Pkg.add("Knet")
   Pkg.test("Knet")	#  Building the CUDAnative run-time library for your sm_61 device, this might take a while...
 #Pkg.build("Knet")
@@ -53,6 +53,7 @@ if false
   using AutoGrad
 end
 if true
+  using Pkg
   Pkg.add(PackageSpec(name = "Flux",version="0.9"))
   #Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
   Pkg.add("Metalhead")
@@ -64,8 +65,9 @@ if true
   using Flux
 end
 if false
-  Pkg.activate(".")
-  Pkg.instantiate(;varbose=true)
+  using Pkg
+  #Pkg.activate(".")
+  #Pkg.instantiate(;varbose=true)
   using CuArrays
   using Flux
 end
@@ -88,17 +90,26 @@ using PyCall
 # causes a conflict with Flux0.9/Metalhead, 
 # install Flux first metalhead and then install these
 
-_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","IJulia", "WebIO"]
-for p in _pkgs
-  #Pkg.installed(p)==nothing && Pkg.add(p)
-  if !in(p, keys(Pkg.installed()))
-    Pkg.add(p)
+function addbuild(pkgs)
+  for p in pkgs
+    #Pkg.installed(p)==nothing && Pkg.add(p)
+    if !in(p, keys(Pkg.installed()))
+      Pkg.add(p)
+    end
+    Pkg.build(p)
+    eval(quote using $(Symbol(p)) end) 
   end
-  Pkg.build(p)
 end
-using Images,ImageMagick,FileIO,HDF5,MAT,NPZ,BSON,Colors,Random,Distributions,Statistics,KernelDensity,GZip,ArgParse,Printf,Plots,PyPlot,CMakeWrapper
 
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper"]
+addbuild(_pkgs)
 
+# HERE PICK EITHER JUPYTER OR JUNO
+
+#---------------- jupyter ----------------
+#=
+_pkgs = ["IJulia", "WebIO"]
+addbuild(_pkgs)
 using IJulia
 Pkg.add("Conda")
 using Conda
@@ -109,6 +120,11 @@ using WebIO
 WebIO.install_jupyter_labextension()
 
 notebook()
-
 println("now run setupemacskeys.sh if you like")
+=#
+
+#---------------- or atom/juno ----------------
+_pkgs = ["CSTParser", "Juno"]
+addbuild(_pkgs)
+
 exit(0)
