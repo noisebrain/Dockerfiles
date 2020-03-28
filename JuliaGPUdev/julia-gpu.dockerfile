@@ -1,15 +1,18 @@
 # dec19 updated, works
 # dec18 this works, however trying to run vae-mnist fails when loading MAT, extra token error
+# this messy file serves as both dockerfile and instructions+notes
 
 # ---------------- TO BUILD ----------------
 # 
 # 	edit dockerfile:
-#	1. edit CUDA-BASE, JULIA_VERSION, SHASUM variables, 
-# 	2. decide if buildfromsource or download, uncomment appropriate block
+# 	1. decide if buildfromsource or download, uncomment appropriate block
+#	2. edit CUDA-BASE, JULIA_VERSION, SHASUM(if fromsource) variables, 
 # 	3. setenv in the build shell:
 # 		setenv juliaver julia131   	# or julia131fs for "from source"
-# 		setenv cudaver cuda92
-# 	4. edit addpackages, pick flux or knet version, follow install setps below
+# 		setenv cudaver cuda92		# or cuda101
+#		setenv fluxver flux09nornn
+#	4. for juno version (only), edit the password (substitute XXXX...)
+# 	5. edit addpackages, pick flux or knet version, follow install setps below
 #### if notbuildfromsource and julia tar.gz is downloaded in /tmp it will be used
 #### OBSOLETE The docker image name *-common denotes that common packages (IJulia, PyPlot, etc) have been preinstalled. Found that it is better to install common packages AFTER installing flux or knet
 # 
@@ -166,6 +169,8 @@ RUN make CXXFLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 all -j$(nproc) \
         JULIA_CPU_TARGET=x86-64 && \
     rm -rf deps/scratch deps/srccache usr-staging
 # 
+# /opt/julia/src is ~200m, /opt/julia/usr is 1.7G but contains the executable
+# 
 RUN ln -fs /opt/julia/usr/bin/julia /usr/local/bin/julia
 WORKDIR /usr/local/bin
 ENV JULIAEXE=/usr/local/bin/julia
@@ -186,6 +191,7 @@ ENV JULIAEXE=/usr/local/bin/julia
 # #ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"  #1.2.0
 # #ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8"  #1.3.0
 # #ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"  #1.3.1
+# #ENV SHASUM="30d126dc3598f3cd0942de21cc38493658037ccc40eb0882b3b4c418770ca751"  #1.4.0
 # # must strip off the closing comment here
 # ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"
 
@@ -223,7 +229,7 @@ COPY julia-gpu.dockerfile addpackages.jl emacskeys emacskeys.LICENSE setupemacsk
 # RUN julia -e 'using Pkg; pkg"add GZip; add ArgParse; add Printf; add Images; add ImageMagick; add IJulia; add PyPlot; add Plots; add FileIO; add HDF5; add MAT; add BSON; add CMakeWrapper; add Random; add Statistics; add KernelDensity; precompile"'
 # jan20 do not add Colors,Images,Distributions -
 # causes a conflict with Flux0.9/Metalhead, 
-# install Flux first metalhead and then install these
+# install Flux, metalhead FIRST and then install these
 
 # no, do this after addpackages!
 # optionally install jupyterlab emacskeys binding - 

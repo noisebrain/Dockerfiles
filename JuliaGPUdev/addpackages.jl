@@ -4,6 +4,7 @@
 
 println("running addpackages.jl")  # renamed from prebuild.jl
 
+ENV["JULIA_CUDA_VERBOSE"] = true
 
 # dec18 suggested workaround for a problem building MAT, comes up while running vae-mnist.jl.
 # did not help, though not clear if it correctly loaded the right version
@@ -56,20 +57,27 @@ if true
   using Pkg
   Pkg.add(PackageSpec(name = "Flux",version="0.9"))
   #Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
-  Pkg.add("Metalhead")
   Pkg.add("CuArrays")
   Pkg.build("CuArrays")
   Pkg.test("CuArrays")
   #Pkg.add("Zygote")
   Pkg.test("Flux") # 0.9 gives 4 errors in RNN, just ignore and manually run the sequel
   using Flux
+  Pkg.add("Metalhead")
+  using Metalhead
 end
 if false
   using Pkg
   #Pkg.activate(".")
   #Pkg.instantiate(;varbose=true)
+  Pkg.add("CuArrays")
+  Pkg.test("CuArrays")
   using CuArrays
+  Pkg.add("Flux")
+  Pkg.test("Flux") 
   using Flux
+  Pkg.add("Metalhead")
+  using Metalhead
 end
 
 using Flux      # if the Pkg.test fails, appears that the "using" above is never invoked
