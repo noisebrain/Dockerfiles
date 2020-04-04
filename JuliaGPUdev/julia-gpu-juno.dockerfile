@@ -248,7 +248,7 @@ COPY julia-gpu.dockerfile julia-gpu-juno.dockerfile addpackages.jl emacskeys ema
 
 
 # NNlib had a threading bug julia1.3/jan20 
-RUN echo "JULIA_NUM_THREADS=1;export JULIA_NUM_THREADS;echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root\""  >> ~/.bashrc
+RUN echo "JULIA_NUM_THREADS=1;export JULIA_NUM_THREADS;echo for juno: /usr/sbin/sshd -D;echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root\""  >> ~/.bashrc
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
 
@@ -280,6 +280,7 @@ EXPOSE 22
 # COPY locale.gen /etc/locale.gen
 # RUN locale-gen
 
+# non-root ssh user. beware typical docker permission problems when using this
 RUN useradd -ms /bin/bash debugger && echo 'debugger:XXXXXX' | chpasswd
 
 WORKDIR /work
