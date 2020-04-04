@@ -55,29 +55,23 @@ if false
 end
 if true
   using Pkg
-  Pkg.add(PackageSpec(name = "Flux",version="0.9"))
-  #Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
+    # PICK VERSION
+  	#Pkg.activate(".")
+  	#Pkg.instantiate(;verbose=true)
+	#Pkg.add(PackageSpec(name = "Flux",version="0.9"))
+	#Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
+    	Pkg.add("Flux")
   Pkg.add("CuArrays")
   Pkg.build("CuArrays")
   Pkg.test("CuArrays")
+  using CuArrays
   #Pkg.add("Zygote")
   Pkg.test("Flux") # 0.9 gives 4 errors in RNN, just ignore and manually run the sequel
   using Flux
   Pkg.add("Metalhead")
   using Metalhead
-end
-if false
-  using Pkg
-  #Pkg.activate(".")
-  #Pkg.instantiate(;varbose=true)
-  Pkg.add("CuArrays")
-  Pkg.test("CuArrays")
-  using CuArrays
-  Pkg.add("Flux")
-  Pkg.test("Flux") 
-  using Flux
-  Pkg.add("Metalhead")
-  using Metalhead
+  Pkg.add("Zygote")
+  using Zygote
 end
 
 using Flux      # if the Pkg.test fails, appears that the "using" above is never invoked
@@ -109,13 +103,12 @@ function addbuild(pkgs)
   end
 end
 
-_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","Colors","Random","Distributions","Statistics","KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper"]
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper"]
 addbuild(_pkgs)
 
 # HERE PICK EITHER JUPYTER OR JUNO
-
 #---------------- jupyter ----------------
-#=
+
 _pkgs = ["IJulia", "WebIO"]
 addbuild(_pkgs)
 using IJulia
@@ -129,10 +122,12 @@ WebIO.install_jupyter_labextension()
 
 notebook()
 println("now run setupemacskeys.sh if you like")
-=#
+
 
 #---------------- or atom/juno ----------------
 _pkgs = ["CSTParser", "Juno"]
 addbuild(_pkgs)
+
+Pkg.status()
 
 exit(0)
