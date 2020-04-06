@@ -82,7 +82,9 @@ Pkg.add("Conda")
 using Conda
 Conda.add("matplotlib")
 # if building from source there is a python2 in /usr/bin, force use of the conda python3
-ENV["PYTHON"] = "/root/.julia/conda/3/bin/python3"	
+if Sys.islinux()
+  ENV["PYTHON"] = "/root/.julia/conda/3/bin/python3"	
+end
 Pkg.add("PyCall")
 Pkg.build("PyCall")
 using PyCall
