@@ -74,6 +74,8 @@ if true
   using Zygote
 end
 
+Pkg.add("CUDAapi"); using CUDAapi
+
 using Flux      # if the Pkg.test fails, appears that the "using" above is never invoked
 
 # get Conda+PyCall setup before adding PyPlot, because it looks for matplotlib

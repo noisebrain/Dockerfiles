@@ -33,6 +33,10 @@
 # docker commit bff36d4f0183 ${juliaver}-${cudaver}-${knetver}
 # 
 # ---------------- TO RUN ----------------
+# todo check the new --gpus flag versus --runtime
+# docker run --gpus all nvidia/cuda:10.0-base nvidia-smi
+# docker run --gpus '"device=UUID-ABCDEF,1"' nvidia/cuda:10.0-base nvidia-smi
+#
 # for juypter:
 # sudo docker run --runtime=nvidia -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-${fluxver}
 # for juno
