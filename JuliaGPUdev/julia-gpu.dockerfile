@@ -31,6 +31,7 @@
 # docker commit bff36d4f0183 ${juliaver}-${cudaver}-${knetver}
 # 
 # ---------------- TO RUN ----------------
+# todo check the new --gpus flag versus --runtime
 # sudo docker run --runtime=nvidia -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-${knetver}
 # container# cd /work;  /root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root
 # local browser go to link like http://127.0.0.1:888/?token= ...
@@ -242,7 +243,7 @@ COPY julia-gpu.dockerfile addpackages.jl emacskeys emacskeys.LICENSE setupemacsk
 
 
 # NNlib had a threading bug julia1.3/jan20 
-RUN echo "JULIA_NUM_THREADS=1;export JULIA_NUM_THREADS;echo for juno: /usr/sbin/sshd -D;echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root\""  >> ~/.bashrc
+RUN echo "JULIA_NUM_THREADS=1;export JULIA_NUM_THREADS;echo TO LAUNCH JUPYTER: \"cd /work;/root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root\""  >> ~/.bashrc
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
 

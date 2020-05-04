@@ -62,12 +62,16 @@ if true
 	#Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
     	Pkg.add("Flux")
   Pkg.add("CuArrays")
-  Pkg.build("CuArrays")
+  #Pkg.build("CuArrays")
   Pkg.test("CuArrays")
   using CuArrays
   #Pkg.add("Zygote")
   Pkg.test("Flux") # 0.9 gives 4 errors in RNN, just ignore and manually run the sequel
   using Flux
+end
+
+# suspect these are not getting added if flux test errors
+if true
   Pkg.add("Metalhead")
   using Metalhead
   Pkg.add("Zygote")
@@ -75,8 +79,17 @@ if true
 end
 
 Pkg.add("CUDAapi"); using CUDAapi
+# CUDAdrv?  https://github.com/GdMacmillan/ml_flux_tutorial/blob/master/ML_Flux_Tutorial.ipynb
+# julia -e 'using Pkg; pkg"add IJulia; add CuArrays; add CUDAnative; add CUDAdrv; add Flux; add BenchmarkTools; add MLDatasets; add ImageMagick; add ImageCore; add Plots; precompile"'
+
+Pkg.pin("Flux")
+Pkg.pin("Zygote")
+Pkg.pin("CuArrays")
+Pkg.pin("CUDAapi")
+
 
 using Flux      # if the Pkg.test fails, appears that the "using" above is never invoked
+using Zygote
 
 # get Conda+PyCall setup before adding PyPlot, because it looks for matplotlib
 using Pkg
@@ -96,25 +109,25 @@ using PyCall
 # causes a conflict with Flux0.9/Metalhead, 
 # install Flux first metalhead and then install these
 
-function addbuild(pkgs)
+function addusing(pkgs)
   for p in pkgs
     #Pkg.installed(p)==nothing && Pkg.add(p)
     if !in(p, keys(Pkg.installed()))
       Pkg.add(p)
     end
-    Pkg.build(p)
+    #Pkg.build(p)
     eval(quote using $(Symbol(p)) end) 
   end
 end
 
-_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","TensorBoardLogger"]
-addbuild(_pkgs)
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","TensorBoardLogger","Literate"]
+addusing(_pkgs)
 
 # HERE PICK EITHER JUPYTER OR JUNO
 #---------------- jupyter ----------------
 
 _pkgs = ["IJulia", "WebIO"]
-addbuild(_pkgs)
+addusing(_pkgs)
 using IJulia
 Pkg.add("Conda")
 using Conda
@@ -125,12 +138,13 @@ using WebIO
 WebIO.install_jupyter_labextension()
 
 notebook()
+println("REPL pkg manager run precompile!")
 println("now run setupemacskeys.sh if you like")
 
 
 #---------------- or atom/juno ----------------
-_pkgs = ["CSTParser", "Juno"]
-addbuild(_pkgs)
+_pkgs = ["CSTParser", "Atom", "Juno"]
+addusing(_pkgs)
 
 Pkg.status()
 
