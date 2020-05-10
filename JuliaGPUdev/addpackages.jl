@@ -2,6 +2,8 @@
 # include only the gpu packages here.
 # That will also make the base image in common with Flux/Knet/other
 
+:todo Pkg.installed is deprecated
+
 println("running addpackages.jl")  # renamed from prebuild.jl
 
 ENV["JULIA_CUDA_VERBOSE"] = true
@@ -131,8 +133,13 @@ addusing(_pkgs)
 using IJulia
 Pkg.add("Conda")
 using Conda
-Conda.add("jupyterlab") # runs conda install -y jupyterlab
 
+error("run the jupyterlab step manually")
+# either run ~/.julia/conda/3/bin/conda install -y jupyterlab
+# OR
+# run WebIO.install_jupyter_labextension() and say "Y" when it asks to install
+Conda.add("jupyterlab") # runs conda install -y jupyterlab
+#
 # conda install -y nodejs
 using WebIO
 WebIO.install_jupyter_labextension()

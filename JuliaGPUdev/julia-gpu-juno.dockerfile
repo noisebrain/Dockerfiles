@@ -22,7 +22,7 @@
 # 
 # ---------------- POST BUILD INSTALL PACKAGES ----------------
 # 
-# sudo docker run --runtime=nvidia --rm -it --ipc=host -v ${PWD}:/work --entrypoint /bin/bash ${juliaver}-${cudaver}
+# sudo docker run --runtime=nvidia --rm -it --ipc=host -v ${PWD}:/work --entrypoint /bin/bash ${juliaver}-${cudaver} [-juno]
 # container# cd /install   # or make sure addpackages.jl is in /work
 # container# JULIA_DEBUG=CUDAapi /usr/local/bin/julia
 # julia> include("addpackages.jl")
@@ -39,12 +39,13 @@
 #
 # for juypter:
 # sudo docker run --runtime=nvidia -p 8888:8888 --rm -it -v ${PWD}:/work --ipc=host --entrypoint /bin/bash ${juliaver}-${cudaver}-${fluxver}
-# for juno
-# sudo docker run --runtime=nvidia -p 7776:22 --rm -it -v ${PWD}:/work --ipc=host ${juliaver}-${cudaver}-juno-${fluxver}
-#
 # container# cd /work;  /root/.julia/conda/3/bin/jupyter-lab --ip 0.0.0.0 --port 8888 --allow-root
 # local browser go to link like http://127.0.0.1:888/?token= ...
 # notebook new>
+#
+# for juno     adjust 7776->7777 to run a second juno session
+# sudo docker run --runtime=nvidia -p 7776:22 --rm -it -v ${PWD}:/work --ipc=host ${juliaver}-${cudaver}-juno-${fluxver}
+# /usr/sbin/sshd -D
 
 # ----------------OLD, TODO----------------
 # COMMANDLINE: dockNV  --rm -v ${PWD}:/data -v $JP/0.7:/root/.julia  julia07-gpu  mlp.jl
@@ -155,7 +156,9 @@ RUN apt-get update && \
                     # basic stuff
                     build-essential ca-certificates \
                     # Julia
-                    curl wget nano cmake gfortran git m4 zlib1g-dev imagemagick hdf5-tools && \
+                    curl wget nano cmake gfortran git m4 zlib1g-dev imagemagick hdf5-tools \
+		    # stuff for exporting jupyter notebook->pdf. adds 1gig
+		    texlive-xetex pandoc inkscape && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 # always clean after installing!
