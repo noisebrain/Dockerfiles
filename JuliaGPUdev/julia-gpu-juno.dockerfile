@@ -4,6 +4,9 @@
 
 # ---------------- TO BUILD ----------------
 # 
+# !!! CHECK THE COMPATIBILITY MATRIX !!!
+# https://docs.nvidia.com/deeplearning/sdk/cudnn-support-matrix/index.html
+# 
 # 	edit dockerfile:
 # 	1. decide if buildfromsource or download, uncomment appropriate block
 #	2. edit CUDA-BASE, JULIA_VERSION, SHASUM(if fromsource) variables, 
