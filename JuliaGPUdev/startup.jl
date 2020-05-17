@@ -6,3 +6,6 @@ println("................startup.jl................")
 #if !isdir("/root/.julia/packages")
 #  run(`cp -r /PREBUILT /root/.julia`)
 #end
+
+# for vscode remote plotting
+ENV["GKSwstype"] = "100"

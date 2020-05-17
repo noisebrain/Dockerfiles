@@ -160,6 +160,8 @@ RUN apt-get update && \
                     build-essential ca-certificates \
                     # Julia
                     curl wget nano cmake gfortran git m4 zlib1g-dev imagemagick hdf5-tools \
+		    # for vscode plotting, see gr-framework.org
+		    libxt6 libxrender1 libxext6 libgl1-mesa-glx libqt5widgets5 \
 		    # stuff for exporting jupyter notebook->pdf. adds 1gig
 		    texlive-xetex pandoc inkscape && \
     apt-get clean && \

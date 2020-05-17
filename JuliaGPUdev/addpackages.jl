@@ -72,6 +72,7 @@ if true
   using Flux
 end
 
+
 # suspect these are not getting added if flux test errors
 if true
   Pkg.add("Metalhead")
@@ -80,6 +81,7 @@ if true
   using Zygote
 end
 
+# todo add CUDAnative CUDAdrv CUDAapi ?
 Pkg.add("CUDAapi"); using CUDAapi
 # CUDAdrv?  https://github.com/GdMacmillan/ml_flux_tutorial/blob/master/ML_Flux_Tutorial.ipynb
 # julia -e 'using Pkg; pkg"add IJulia; add CuArrays; add CUDAnative; add CUDAdrv; add Flux; add BenchmarkTools; add MLDatasets; add ImageMagick; add ImageCore; add Plots; precompile"'
