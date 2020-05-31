@@ -16,6 +16,9 @@
 #		setenv fluxver flux09nornn
 #	4. for juno version (only), edit the password (substitute XXXX...)
 # 	5. edit addpackages, pick flux or knet version, follow install setps below
+#	6. run the addpackages steps (below)
+# 	7. copy the jupyter_unicode files
+
 #### if notbuildfromsource and julia tar.gz is downloaded in /tmp it will be used
 #### OBSOLETE The docker image name *-common denotes that common packages (IJulia, PyPlot, etc) have been preinstalled. Found that it is better to install common packages AFTER installing flux or knet
 # 

@@ -157,4 +157,8 @@ addusing(_pkgs)
 
 Pkg.status()
 
+# pre-download mnist
+MLDatasets.FashionMNIST.traindata(Float32)
+MLDatasets.MNIST.traindata(Float32)
+
 exit(0)
