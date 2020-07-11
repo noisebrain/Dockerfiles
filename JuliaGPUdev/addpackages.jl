@@ -63,10 +63,10 @@ if true
 	#Pkg.add(PackageSpec(name = "Flux",version="0.9"))
 	#Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
     	Pkg.add("Flux")
-  Pkg.add("CuArrays")
-  #Pkg.build("CuArrays")
-  Pkg.test("CuArrays")
-  using CuArrays
+  Pkg.add("CUDA")
+  #Pkg.build("CUDA")
+  Pkg.test("CUDA")
+  using CUDA
   #Pkg.add("Zygote")
   Pkg.test("Flux") # 0.9 gives 4 errors in RNN, just ignore and manually run the sequel
   using Flux
@@ -88,7 +88,7 @@ Pkg.add("CUDAapi"); using CUDAapi
 
 Pkg.pin("Flux")
 Pkg.pin("Zygote")
-Pkg.pin("CuArrays")
+Pkg.pin("CUDA")
 Pkg.pin("CUDAapi")
 
 
@@ -124,7 +124,7 @@ function addusing(pkgs)
   end
 end
 
-_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","MLDatasets","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","FiniteDifferences","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Parameters","Logging", "TensorBoardLogger","Literate","ProgressMeter","DrWatson"]
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","MLDatasets","DataFrames","CSV","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","FiniteDifferences","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Parameters","Logging", "TensorBoardLogger","Literate","ProgressMeter","DrWatson","Revise"]
 addusing(_pkgs)
 
 # HERE PICK EITHER JUPYTER OR JUNO
@@ -133,9 +133,11 @@ addusing(_pkgs)
 _pkgs = ["IJulia", "WebIO"]
 addusing(_pkgs)
 using IJulia
-Pkg.add("Conda")
-using Conda
+#Pkg.add("Conda")	# added above
+#using Conda
 
+
+# BEGIN-JUPYTERLAB-BROKEN
 error("run the jupyterlab step manually")
 # either run ~/.julia/conda/3/bin/conda install -y jupyterlab
 # OR
@@ -145,6 +147,7 @@ Conda.add("jupyterlab") # runs conda install -y jupyterlab
 # conda install -y nodejs
 using WebIO
 WebIO.install_jupyter_labextension()
+# END-JUPYTERLAB-BROKEN
 
 notebook()
 println("REPL pkg manager run precompile!")

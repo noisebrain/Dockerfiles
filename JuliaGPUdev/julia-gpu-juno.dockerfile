@@ -166,7 +166,8 @@ RUN apt-get update && \
 		    # for vscode plotting, see gr-framework.org
 		    libxt6 libxrender1 libxext6 libgl1-mesa-glx libqt5widgets5 \
 		    # stuff for exporting jupyter notebook->pdf. adds 1gig
-		    texlive-xetex pandoc inkscape && \
+		    texlive-xetex texlive-generic-extra texlive-latex-extra \
+		    texlive-fonts-recommended pandoc inkscape && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 # always clean after installing!
@@ -267,6 +268,8 @@ RUN echo "JULIA_NUM_THREADS=1;export JULIA_NUM_THREADS;echo TO LAUNCH JUPYTER: \
 
 COPY startup.jl ${HOME}/.julia/config/startup.jl
 
+# interesting techniques see 
+# https://discourse.julialang.org/t/ann-myworkflow-jl-runs-on-binder/34217
 
 # setup ssh server for juno access
 # adapted from guide at https://techytok.com/from-zero-to-julia-using-docker/
@@ -297,6 +300,9 @@ EXPOSE 22
 
 # non-root ssh user. beware typical docker permission problems when using this
 RUN useradd -ms /bin/bash debugger && echo 'debugger:XXXXXX' | chpasswd
+
+# using --user $(id -u):$(id -g), it starts up as user "nobody",
+# then an error about not finding the .ssh directory
 
 WORKDIR /work
 RUN chmod go+rwx /work
