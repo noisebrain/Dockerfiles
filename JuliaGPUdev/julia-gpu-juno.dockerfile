@@ -154,7 +154,7 @@ FROM nvcr.io/nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04
 MAINTAINER j.p.lewis <noisebrain@gmail.com>
 
 ENV HOME=/root
-ENV JULIA_VERSION=1.3.1
+ENV JULIA_VERSION=1.5.0
 ENV CUDA_HOME=/usr/local/cuda
 
 RUN apt-get update && \
@@ -214,8 +214,9 @@ ENV JULIAEXE=/usr/local/bin/julia
 # #ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8"  #1.3.0
 # #ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"  #1.3.1
 # #ENV SHASUM="30d126dc3598f3cd0942de21cc38493658037ccc40eb0882b3b4c418770ca751"  #1.4.0
+# #ENV SHASUM="be7af676f8474afce098861275d28a0eb8a4ece3f83a11027e3554dcdecddb91"  #1.5.0
 # # must strip off the closing comment here
-# ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"
+# ENV SHASUM="be7af676f8474afce098861275d28a0eb8a4ece3f83a11027e3554dcdecddb91"
 
 # RUN mkdir /opt/julia-${JULIA_VERSION} && \
 #     cd /tmp && \
