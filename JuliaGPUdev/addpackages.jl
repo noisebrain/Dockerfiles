@@ -124,7 +124,7 @@ function addusing(pkgs)
   end
 end
 
-_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","MLDatasets","DataFrames","CSV","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","FiniteDifferences","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Parameters","Logging", "TensorBoardLogger","Literate","ProgressMeter","DrWatson","Revise"]
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","MLDatasets","DataFrames","CSV","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","FiniteDifferences","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Parameters","Logging", "TensorBoardLogger","Literate","ProgressMeter","DrWatson","Revise","MeshCat"]
 addusing(_pkgs)
 
 # HERE PICK EITHER JUPYTER OR JUNO

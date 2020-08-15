@@ -10,12 +10,12 @@
 # 	edit dockerfile:
 # 	1. decide if buildfromsource or download, uncomment appropriate block
 #	2. edit CUDA-BASE, JULIA_VERSION, SHASUM(if fromsource) variables, 
+#	2. for juno version (only), edit the password (substitute XXXX...)
 # 	3. setenv in the build shell:
 # 		setenv juliaver julia131   	# or julia131fs for "from source"
 # 		setenv cudaver cuda92		# or cuda101
 #		setenv fluxver flux09nornn
-#	4. for juno version (only), edit the password (substitute XXXX...)
-# 	5. edit addpackages, pick flux or knet version, follow install setps below
+# 	4. edit addpackages, pick flux or knet version, follow install setps below
 #	6. run the addpackages steps (below)
 # 	7. copy the jupyter_unicode files
 
