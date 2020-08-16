@@ -1,3 +1,12 @@
+# 1080 MACHINE PROBLEMS:
+#  with cuda92, julia CUDA has a missing symbol nvmlSystemGetCudaDriverVersion_v2
+#  the only cuda10.0 images are for centos
+#  with cuda10.1, docker error starting container: 
+#    Error response from daemon: OCI runtime create failed: container_linux.go:348: starting container process caused "process_linux.go:402:
+# --------------------> maybe needs a docker update?  web says a new driver is needed, 390.48
+# see end of this page  for possible fix https://github.com/NVIDIA/nvidia-docker/issues/683
+#
+# 
 # dec19 updated, works
 # dec18 this works, however trying to run vae-mnist fails when loading MAT, extra token error
 # this messy file serves as both dockerfile and instructions+notes
@@ -13,7 +22,7 @@
 #	2. for juno version (only), edit the password (substitute XXXX...)
 # 	3. setenv in the build shell:
 # 		setenv juliaver julia131   	# or julia131fs for "from source"
-# 		setenv cudaver cuda92		# or cuda101
+# 		setenv cudaver cuda101 		# or cuda92
 #		setenv fluxver flux09nornn
 # 	4. edit addpackages, pick flux or knet version, follow install setps below
 #	6. run the addpackages steps (below)
@@ -144,8 +153,8 @@
 # docker pull nvcr.io/nvidia/pytorch:19.11-py3
 # there is a julia docker image, it would not have cuda drivers
 # CUDA-BASE
-#FROM nvcr.io/nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
-FROM nvcr.io/nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04
+FROM nvcr.io/nvidia/cuda:10.1-cudnn7-devel-ubuntu18.04
+#FROM nvcr.io/nvidia/cuda:9.2-cudnn7-devel-ubuntu16.04
 #FROM nvcr.io/nvidia/cuda:9.0-cudnn7-devel-ubuntu16.04
 #FROM nvidia/cuda:8.0-cudnn7-devel-ubuntu16.04
 # selecting 10.1 on a machine with driver396.24/1080 card gave an error when starting container,
@@ -173,31 +182,34 @@ RUN apt-get update && \
 # always clean after installing!
 
 ## ---------------- BUILD FROM SOURCE ----------------
+## mlduck 1.5.0 errors with: /opt/julia/usr/include/llvm/ADT/None.h:23:23: error: 'NoneType' is not a class or namespace
 ## Note the build fails without python, but as a result PyPlot will find this python rather than the one installed by Conda.
 ## Thus need to either install matplotlib here, or set the path to the Conda python in addpackages.jl
+##
 ## (un)comment from here
-WORKDIR /opt
-RUN apt-get update && \
-	apt-get install --yes --no-install-recommends \
-	apt-utils python
-RUN git clone https://github.com/JuliaLang/julia.git && \
-    cd julia && \
-    git checkout v${JULIA_VERSION}
-## build
-WORKDIR /opt/julia
-RUN make CXXFLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 all -j$(nproc) \
-        MARCH=x86-64 \
-        USE_GPL_LIBS=0 \
-        JULIA_CPU_TARGET=x86-64 && \
-    rm -rf deps/scratch deps/srccache usr-staging
-# 
-# /opt/julia/src is ~200m, /opt/julia/usr is 1.7G but contains the executable
-# 
-RUN ln -fs /opt/julia/usr/bin/julia /usr/local/bin/julia
-WORKDIR /usr/local/bin
-ENV JULIAEXE=/usr/local/bin/julia
-#
+## WORKDIR /opt
+## RUN apt-get update && \
+## 	apt-get install --yes --no-install-recommends \
+## 	apt-utils python
+## RUN git clone https://github.com/JuliaLang/julia.git && \
+##     cd julia && \
+##     git checkout v${JULIA_VERSION}
+## ## build
+## WORKDIR /opt/julia
+## RUN make CXXFLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 all -j$(nproc) \
+##         MARCH=x86-64 \
+##         USE_GPL_LIBS=0 \
+##         JULIA_CPU_TARGET=x86-64 && \
+##     rm -rf deps/scratch deps/srccache usr-staging
+## # 
+## # /opt/julia/src is ~200m, /opt/julia/usr is 1.7G but contains the executable
+## # 
+## RUN ln -fs /opt/julia/usr/bin/julia /usr/local/bin/julia
+## WORKDIR /usr/local/bin
+## ENV JULIAEXE=/usr/local/bin/julia
+## #
 ## (un)comment to here
+##
 # no, symlink to /usr/local
 # #-WORKDIR /opt/julia/usr/bin
 # #-ENV JULIAEXE=/opt/julia/usr/bin/julia
@@ -207,28 +219,28 @@ ENV JULIAEXE=/usr/local/bin/julia
 # this unpacks into /opt/julia-${JULIA_VERSION} , ../bin/julia is the executable
 ## (un)comment from here
 # # retrieve a checksum from url like this: https://julialang-s3.julialang.org/bin/checksums/julia-1.2.0.sha256
-# #ENV SHASUM="d20e6984bcf8c3692d853a9922e2cf1de19b91201cb9e396d9264c32cebedc46"  #0.6.4
-# #ENV SHASUM="35211bb89b060bfffe81e590b8aeb8103f059815953337453f632db9d96c1bd6"  #0.7.0
-# #ENV SHASUM="e0e93949753cc4ac46d5f27d7ae213488b3fef5f8e766794df0058e1b3d2f142"  #1.0.2
-# #ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"  #1.2.0
-# #ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8"  #1.3.0
-# #ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"  #1.3.1
-# #ENV SHASUM="30d126dc3598f3cd0942de21cc38493658037ccc40eb0882b3b4c418770ca751"  #1.4.0
-# #ENV SHASUM="be7af676f8474afce098861275d28a0eb8a4ece3f83a11027e3554dcdecddb91"  #1.5.0
-# # must strip off the closing comment here
-# ENV SHASUM="be7af676f8474afce098861275d28a0eb8a4ece3f83a11027e3554dcdecddb91"
+#ENV SHASUM="d20e6984bcf8c3692d853a9922e2cf1de19b91201cb9e396d9264c32cebedc46"  #0.6.4
+#ENV SHASUM="35211bb89b060bfffe81e590b8aeb8103f059815953337453f632db9d96c1bd6"  #0.7.0
+#ENV SHASUM="e0e93949753cc4ac46d5f27d7ae213488b3fef5f8e766794df0058e1b3d2f142"  #1.0.2
+#ENV SHASUM="926ced5dec5d726ed0d2919e849ff084a320882fb67ab048385849f9483afc47"  #1.2.0
+#ENV SHASUM="9ec9e8076f65bef9ba1fb3c58037743c5abb3b53d845b827e44a37e7bcacffe8"  #1.3.0
+#ENV SHASUM="faa707c8343780a6fe5eaf13490355e8190acf8e2c189b9e7ecbddb0fa2643ad"  #1.3.1
+#ENV SHASUM="30d126dc3598f3cd0942de21cc38493658037ccc40eb0882b3b4c418770ca751"  #1.4.0
+#ENV SHASUM="be7af676f8474afce098861275d28a0eb8a4ece3f83a11027e3554dcdecddb91"  #1.5.0
+# must strip off the closing comment here
+ENV SHASUM="be7af676f8474afce098861275d28a0eb8a4ece3f83a11027e3554dcdecddb91"
 
-# RUN mkdir /opt/julia-${JULIA_VERSION} && \
-#     cd /tmp && \
-#         [ -f julia-${JULIA_VERSION}-linux-x86_64.tar.gz ] || ( wget -q https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz ) && \
-#     echo "${SHASUM} *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
-#     tar xzf julia-${JULIA_VERSION}-linux-x86_64.tar.gz -C /opt/julia-${JULIA_VERSION} --strip-components=1 && \
-#     rm /tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
-# 
-# RUN ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
-# WORKDIR /usr/local/bin
-# ENV JULIAEXE=/usr/local/bin/julia
-# 
+RUN mkdir /opt/julia-${JULIA_VERSION} && \
+    cd /tmp && \
+        [ -f julia-${JULIA_VERSION}-linux-x86_64.tar.gz ] || ( wget -q https://julialang-s3.julialang.org/bin/linux/x64/`echo ${JULIA_VERSION} | cut -d. -f 1,2`/julia-${JULIA_VERSION}-linux-x86_64.tar.gz ) && \
+    echo "${SHASUM} *julia-${JULIA_VERSION}-linux-x86_64.tar.gz" | sha256sum -c - && \
+    tar xzf julia-${JULIA_VERSION}-linux-x86_64.tar.gz -C /opt/julia-${JULIA_VERSION} --strip-components=1 && \
+    rm /tmp/julia-${JULIA_VERSION}-linux-x86_64.tar.gz
+
+RUN ln -fs /opt/julia-*/bin/julia /usr/local/bin/julia
+WORKDIR /usr/local/bin
+ENV JULIAEXE=/usr/local/bin/julia
+ 
 ## (un)comment to here
 ## ---------------- END DOWNLOAD JULIA ----------------
 
