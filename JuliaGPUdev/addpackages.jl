@@ -45,6 +45,16 @@ using GZip,ArgParse,Images,ImageMagick,Colors,IJulia,PyPlot,FileIO,HDF5,MAT,CMak
 #        @test_broken gradcheck(pool, ax; kw=[(:padding,1)])
 # This was weird because nothing in Knet had changed, though maybe was some other package 
 
+# For recent drivers need to do this to allow cuda profiling, which is called in the test():
+#=
+        Create .conf file (e.g. profile.conf) in folder /etc/modprobe.d
+        Open file /etc/modprobe.d/profile.conf in any editor
+        Add below line in profile.conf
+        options nvidia "NVreg_RestrictProfilingToAdminUsers=0"
+        Close file /etc/modprobe.d/profile.conf
+        Restart your machine
+=#
+
 if false
   using Pkg
   Pkg.add("Knet")
