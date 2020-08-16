@@ -2,7 +2,7 @@
 # include only the gpu packages here.
 # That will also make the base image in common with Flux/Knet/other
 
-:todo Pkg.installed is deprecated
+#:todo Pkg.installed is deprecated
 
 println("running addpackages.jl")  # renamed from prebuild.jl
 
@@ -63,7 +63,7 @@ if true
 	#Pkg.add(PackageSpec(name = "Flux",version="0.9"))
 	#Pkg.add(PackageSpec(name = "Flux",version="0.8.3"))
     	Pkg.add("Flux")
-  Pkg.add("CUDA")
+  Pkg.add("CUDA") # 1080/cuda92: could not load symbol "nvmlSystemGetCudaDriverVersion_v2"
   #Pkg.build("CUDA")
   Pkg.test("CUDA")
   using CUDA

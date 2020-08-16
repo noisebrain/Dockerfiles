@@ -5,7 +5,7 @@
 #    Error response from daemon: OCI runtime create failed: container_linux.go:348: starting container process caused "process_linux.go:402:
 # --------------------> maybe needs a docker update?  web says a new driver is needed, 390.48
 # see end of this page  for possible fix https://github.com/NVIDIA/nvidia-docker/issues/683
-#
+# Had been using 396.24.02, upgraded to 430.64
 # 
 # dec19 updated, works
 # dec18 this works, however trying to run vae-mnist fails when loading MAT, extra token error
@@ -21,9 +21,9 @@
 #	2. edit CUDA-BASE, JULIA_VERSION, SHASUM(if fromsource) variables, 
 #	2. for juno version (only), edit the password (substitute XXXX...)
 # 	3. setenv in the build shell:
-# 		setenv juliaver julia131   	# or julia131fs for "from source"
+# 		setenv juliaver julia150   	# or julia150fs for "from source"
 # 		setenv cudaver cuda101 		# or cuda92
-#		setenv fluxver flux09nornn
+#		setenv fluxver flux111		# flux11.1
 # 	4. edit addpackages, pick flux or knet version, follow install setps below
 #	6. run the addpackages steps (below)
 # 	7. copy the jupyter_unicode files
@@ -31,9 +31,9 @@
 #### if notbuildfromsource and julia tar.gz is downloaded in /tmp it will be used
 #### OBSOLETE The docker image name *-common denotes that common packages (IJulia, PyPlot, etc) have been preinstalled. Found that it is better to install common packages AFTER installing flux or knet
 # 
-# sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}
-#  				OR
 # sudo docker build . -f julia-gpu-juno.dockerfile --network host -t ${juliaver}-${cudaver}-juno
+#  				OR
+# sudo docker build . -f julia-gpu.dockerfile --network host -t ${juliaver}-${cudaver}
 # 
 # ---------------- POST BUILD INSTALL PACKAGES ----------------
 # 
