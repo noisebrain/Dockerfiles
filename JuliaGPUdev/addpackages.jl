@@ -134,13 +134,15 @@ function addusing(pkgs)
   end
 end
 
-_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","MLDatasets","DataFrames","CSV","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","FiniteDifferences","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Parameters","Logging", "TensorBoardLogger","Literate","ProgressMeter","DrWatson","Revise","MeshCat"]
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","MLDatasets","DataFrames","CSV","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","FiniteDifferences","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Parameters","Logging", "TensorBoardLogger","Literate","ProgressMeter","DrWatson","Revise","Metalhead"]
+
 addusing(_pkgs)
 
 # HERE PICK EITHER JUPYTER OR JUNO
 #---------------- jupyter ----------------
 
-_pkgs = ["IJulia", "WebIO"]
+_pkgs = ["IJulia", "WebIO"] # MeshCat
+# "MeshCat" does not build on 1.5: IOError: could not spawn `unzip -x /tmp/jl_LmztJ1/meshcat.zip -d /tmp/jl_LmztJ1`: no such file or directory 
 addusing(_pkgs)
 using IJulia
 #Pkg.add("Conda")	# added above
