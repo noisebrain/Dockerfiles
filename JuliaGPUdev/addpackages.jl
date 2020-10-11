@@ -134,7 +134,7 @@ function addusing(pkgs)
   end
 end
 
-_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","MLDatasets","DataFrames","CSV","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","FiniteDifferences","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Parameters","Logging", "TensorBoardLogger","Literate","ProgressMeter","DrWatson","Revise","Metalhead"]
+_pkgs = ["Images","ImageMagick","FileIO","HDF5","MAT","NPZ","BSON","MLDatasets","DataFrames","CSV","Colors","Random","Distributions","Statistics","StatsBase", "KernelDensity","Distances","FiniteDifferences","GZip","ArgParse","Printf","Plots","PyPlot","CMakeWrapper","Parameters","Logging", "TensorBoardLogger","Literate","ProgressMeter","DrWatson","Revise","Pluto","Metalhead"]
 
 addusing(_pkgs)
 
